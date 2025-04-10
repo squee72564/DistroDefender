@@ -3,7 +3,7 @@
 
 **Comprehensive Monitoring, Custom Built for Linux**
 
-Show Image
+![image](https://github.com/squee72564/DistroDefender/assets/distro_defender.jpg)
 
 ## Overview
 
@@ -29,9 +29,7 @@ Our mission is to create a powerful, scalable, and easy-to-deploy security monit
 
 DistroDefender consists of several core components:
 
-Copy
-
-`┌─────────────────────────────────────────────────────────────────┐ │                    DistroDefender Platform                       │ │                                                                 │ │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │ │  │ Endpoint    │  │ Network     │  │ SIEM        │  │ XDR     │ │ │  │ Monitoring  │  │ Security    │  │ Core        │  │ Engine  │ │ │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │ │                                                                 │ │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │ │  │ Data        │  │ Analytics   │  │ Threat      │  │ Response │ │ │  │ Pipeline    │  │ Engine      │  │ Intelligence│  │ Platform │ │ │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │ │                                                                 │ │  ┌─────────────────────────┐  ┌───────────────────────────────┐ │ │  │ Visualization Dashboard │  │ Management & Configuration     │ │ │  └─────────────────────────┘  └───────────────────────────────┘ │ └─────────────────────────────────────────────────────────────────┘`
+![image](https://github.com/squee72564/DistroDefender/assets/architecture_overview.png)
 
 ### Core Components
 
@@ -78,16 +76,13 @@ Our current development roadmap includes:
 
 ## License
 
-DistroDefender is released under the [Apache 2.0 License](LICENSE).
+DistroDefender is released under the [MIT](LICENSE).
 
 ## Contact
 
--   GitHub Issues: [Report bugs or request features](https://github.com/distrodefender/distrodefender/issues)
+-   GitHub Issues: [Report bugs or request features](https://github.com/squee72564/DistroDefender/issues)
 -   Website: [distrodefender.io](https://distrodefender.io) (Coming Soon)
--   Community: [Join our Slack](https://distrodefender.slack.com) (Coming Soon)
 
 ----------
 
 DistroDefender - Securing Linux, Together.
-
-Add to Conversation
