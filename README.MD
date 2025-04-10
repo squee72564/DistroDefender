@@ -61,7 +61,7 @@ We welcome contributions from the community! Here's how you can get involved:
 -   **Use Cases**: Provide feedback on security use cases
 -   **Feature Requests**: Suggest new features and capabilities
 
-Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for more details on how to contribute.
+Please see our [CONTRIBUTING.md](CONTRIBUTING.MD) file for more details on how to contribute.
 
 ## Roadmap
 
