@@ -3,7 +3,7 @@
 
 **Comprehensive Monitoring, Custom Built for Linux**
 
-![image](https://github.com/squee72564/DistroDefender/assets/distro_defender.jpg)
+![image](https://github.com/squee72564/DistroDefender/blob/main/assets/distro_defender.jpg)
 
 ## Overview
 
@@ -29,7 +29,7 @@ Our mission is to create a powerful, scalable, and easy-to-deploy security monit
 
 DistroDefender consists of several core components:
 
-![image](https://github.com/squee72564/DistroDefender/assets/architecture_overview.png)
+![image](https://github.com/squee72564/DistroDefender/blob/main/assets/architecture_overview.png)
 
 ### Core Components
 
