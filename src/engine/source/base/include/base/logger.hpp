@@ -120,4 +120,23 @@ void stop();
 
 } // namespace logger
 
-#endif
+#define LOG_TRACE(msg, ...)                                                                                            \
+    logger::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, SPDLOG_FUNCTION}, spdlog::level::trace, msg, ##__VA_ARGS__)
+#define LOG_DEBUG(msg, ...)                                                                                            \
+    logger::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, SPDLOG_FUNCTION}, spdlog::level::debug, msg, ##__VA_ARGS__)
+#define LOG_INFO(msg, ...)                                                                                             \
+    logger::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, SPDLOG_FUNCTION}, spdlog::level::info, msg, ##__VA_ARGS__)
+#define LOG_WARNING(msg, ...)                                                                                          \
+    logger::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, SPDLOG_FUNCTION}, spdlog::level::warn, msg, ##__VA_ARGS__)
+#define LOG_ERROR(msg, ...)                                                                                            \
+    logger::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, SPDLOG_FUNCTION}, spdlog::level::err, msg, ##__VA_ARGS__)
+#define LOG_CRITICAL(msg, ...)                                                                                         \
+    logger::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, SPDLOG_FUNCTION}, spdlog::level::critical, msg, ##__VA_ARGS__)
+
+#endif // _LOGGER_HPP

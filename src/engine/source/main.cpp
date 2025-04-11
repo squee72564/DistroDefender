@@ -6,7 +6,10 @@ int main(int argc, char* argv[]) {
     
     // Initialize Logger
     {
-        std::cout << "Hello world!!!!!" << std::endl;
+            logger::LoggerConfig cfg;
+            cfg.level = logger::LogLevel::Info;
+            logger::start(cfg);
+            LOG_INFO("Logging initialized.");
     }
 
     return 0;
