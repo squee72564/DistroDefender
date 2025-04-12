@@ -9,6 +9,7 @@ set(INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
 add_library(base STATIC
     ${SRC_DIR}/logger.cpp
+    ${SRC_DIR}/json.cpp
 )
 
 target_include_directories(base
@@ -40,6 +41,7 @@ if(ENGINE_BUILD_TEST)
 
     add_executable(base_utest
         ${UNIT_SRC_DIR}/error_test.cpp
+        ${UNIT_SRC_DIR}/json_test.cpp
     )
 
     target_include_directories(base_utest
@@ -60,7 +62,7 @@ if(ENGINE_BUILD_TEST)
 
     gtest_discover_tests(base_utest)
 
-    # This needs to be instantiated along because the logger is
+    # This needs to be instantiated alone because the logger is
     # instantiated on tests
 
     add_executable(base_logger_utest
@@ -81,5 +83,5 @@ if(ENGINE_BUILD_TEST)
 
     gtest_discover_tests(base_logger_utest)
 
-    endif(ENGINE_BUILD_TEST)
+endif(ENGINE_BUILD_TEST)
 
