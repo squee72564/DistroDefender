@@ -1,6 +1,15 @@
+#include <type_traits>
+#include <iostream>
+
+#include <base/error.hpp>
 #include <base/json.hpp>
+
 #include <gtest/gtest.h>
 
+#include <rapidjson/document.h>
+
+
+namespace {
 const char* jsonStr = R"({
     "hello": "world",
     "t": true,
@@ -8,12 +17,401 @@ const char* jsonStr = R"({
     "n": null,
     "i": 123,
     "pi": 3.1416,
+    "a": [1, 2, 3, 4],
+    "t2": true
+})";
+
+const char* jsonNestedObj = R"({
+    "o": {
+        "i": 42
+    },
+    "o2": {
+        "a": 1,
+        "b": 2,
+        "c": false,
+        "d": null
+    },
+    "test": "testing"
+})";
+
+const char* errStr = R"({
+    "hello" "world",
+    "t": true,
+    "f": false,
+    "n": null,
+    "i": 123,
+    "pi": 3.1416,
     "a": [1, 2, 3, 4]
 })";
+}
+
+TEST(JsonTest, CopyDeleted)
+{
+    ASSERT_FALSE(std::is_copy_constructible<json::Json>::value);
+    ASSERT_FALSE(std::is_copy_assignable<json::Json>::value);
+}
+
+TEST(JsonTest, MoveEnabled)
+{
+    ASSERT_TRUE(std::is_move_constructible<json::Json>::value);
+    ASSERT_TRUE(std::is_move_assignable<json::Json>::value);
+}
+
+TEST(JsonTest, DefaultConstructor)
+{
+    json::Json json{};
+    std::optional<base::Error> err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+    ASSERT_TRUE(json.isEmpty(""));
+}
+
+TEST(JsonTest, DocumentConstructor)
+{
+    json::Json json{rapidjson::Document()};
+    std::optional<base::Error> err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+    ASSERT_TRUE(json.isEmpty(""));
+}
+
+TEST(JsonTest, ValueConstructor)
+{
+    rapidjson::Value value;
+    json::Json json{value};
+    std::optional<base::Error> err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+    ASSERT_TRUE(json.isEmpty(""));
+}
 
 TEST(JsonTest, CStrConstructor)
 {
-    json::Json json(jsonStr);
-    std::optional<base::Error> err = json.getError();
+    json::Json json{jsonStr};
+    std::optional<base::Error> err = json.getParseError();
     ASSERT_FALSE(base::isError(err));
+    ASSERT_FALSE(json.isEmpty(""));
+}
+
+TEST(JsonTest, GetParseError)
+{
+    json::Json json{errStr};
+    std::optional<base::Error> err = json.getParseError();
+    ASSERT_TRUE(base::isError(err));
+}
+
+TEST(JsonTest, TestExists)
+{
+    json::Json json{jsonStr};
+    std::optional<base::Error> err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.exists("/hello"));
+    ASSERT_FALSE(json.exists("/non_existent"));
+}
+
+TEST(JsonTest, equalsJsonDOM)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json::Json json2{jsonStr};
+    err = json2.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json::Json json3{};
+    err = json3.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.equals("", json2));
+    ASSERT_TRUE(json2.equals("", json));
+
+    ASSERT_FALSE(json.equals("", json3));
+}
+
+TEST(JsonTest, equalsPtrPath)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.equals("/t", "/t2"));
+    ASSERT_FALSE(json.equals("/t", "/hello"));
+}
+
+TEST(JsonTest, setJsonDOM)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json::Json json2{};
+    json2.set("", json);
+
+    ASSERT_TRUE(json2.equals("", json));
+}
+
+TEST(JsonTest, setPtrPath)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.set("/t3", "/t");
+
+    ASSERT_TRUE(json.equals("/t", "/t3"));
+}
+
+TEST(JsonTest, getString)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/hello", json::Type::String));
+    
+    std::optional<std::string> s = json.getString("/hello");
+
+    ASSERT_TRUE(s.has_value());
+    ASSERT_TRUE(s.value() == "world");
+}
+
+TEST(JsonTest, getInt32)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/i", json::Type::Int));
+    
+    std::optional<std::int32_t> val = json.getInt32("/i");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val.value() == 123);
+}
+
+TEST(JsonTest, getInt64)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/i", json::Type::Int64));
+    
+    std::optional<std::int64_t> val = json.getInt64("/i");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val.value() == 123);
+}
+
+TEST(JsonTest, getFloat)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/pi", json::Type::Float));
+    
+    std::optional<float> val = json.getFloat("/pi");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val == 3.1416f);
+}
+
+TEST(JsonTest, getDouble)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/pi", json::Type::Double));
+    
+    std::optional<double> val = json.getDouble("/pi");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val == 3.1416);
+}
+
+TEST(JsonTest, getNumberAsDouble)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/pi", json::Type::Double));
+    
+    std::optional<double> val = json.getDouble("/pi");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val == 3.1416);
+
+    ASSERT_FALSE(json.isType("/hello", json::Type::Double));
+
+    val = json.getNumberAsDouble("/hello");
+    ASSERT_FALSE(val.has_value());
+}
+
+TEST(JsonTest, getBool)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/f", json::Type::Boolean));
+    
+    std::optional<bool> val = json.getBool("/f");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val == false);
+
+    ASSERT_FALSE(json.isType("/hello", json::Type::Boolean));
+
+    val = json.getBool("/hello");
+    ASSERT_FALSE(val.has_value());
+}
+
+TEST(JsonText, getArray)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/a", json::Type::Array));
+    
+    std::optional<std::vector<json::Json>> val = json.getArray("/a");
+
+    ASSERT_TRUE(val.has_value());
+
+    std::vector<json::Json> v = std::move(val.value());
+
+    std::int32_t i = 1;
+    for (const auto& obj : v) {
+        ASSERT_TRUE(i++ == obj.getInt32("").value());
+    }
+
+    ASSERT_FALSE(json.isType("/hello", json::Type::Array));
+
+    val = json.getArray("/hello");
+    ASSERT_FALSE(val.has_value());
+}
+
+TEST(JsonTest, getObject)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonNestedObj};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/o", json::Type::Object));
+    
+    std::optional<
+        std::vector<std::pair<std::string,json::Json>>
+    > val = json.getObject("/o");
+
+    ASSERT_TRUE(val.has_value());
+
+    std::vector<std::pair<std::string,json::Json>> o
+        = std::move(val.value());
+    
+    const auto& [key, child] = o[0];
+
+    ASSERT_TRUE(child.isType("", json::Type::Int));
+    std::optional<std::int32_t> child_val = child.getInt32("");
+
+    ASSERT_TRUE(child_val.has_value());
+    ASSERT_TRUE(42 == child_val.value());
+
+    ASSERT_FALSE(json.isType("/hello", json::Type::Object));
+
+    val = json.getObject("/hello");
+    ASSERT_FALSE(val.has_value());
+}
+
+TEST(JsonTest, collectFields)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonNestedObj};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    std::optional<std::vector<std::string>> val = json.getFields();
+
+    ASSERT_TRUE(val.has_value());
+
+    std::vector<std::string> fields = val.value();
+    std::vector<std::string> expected{
+        "o.i",
+        "o2.a",
+        "o2.b",
+        "o2.c",
+        "o2.d",
+        "test"
+    };
+
+    ASSERT_TRUE(fields.size() == expected.size());
+
+    for (int i = 0; i < fields.size(); ++i) {
+        ASSERT_TRUE(fields[i] == expected[i]);
+    }
+}
+
+TEST(JsonTest, getJsonDOM)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonNestedObj};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    std::optional<json::Json> val = json.getJsonDOM("");
+
+    ASSERT_TRUE(val.has_value());
+
+    json::Json newJson = std::move(val.value());
+
+    ASSERT_TRUE(newJson.equals("", json));
+}
+
+TEST(JsonTest, size)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+    
+    ASSERT_TRUE(4 == json.size("/a"));
+    ASSERT_TRUE(5 == json.size("/hello"));
+
+    json::Json jsonObj{jsonNestedObj};
+    err = jsonObj.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(4 == jsonObj.size("/o2"));
+
+
 }
