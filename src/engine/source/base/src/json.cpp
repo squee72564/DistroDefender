@@ -26,7 +26,7 @@ JsonDOM::JsonDOM(const rapidjson::Value & value)
     document_.CopyFrom(value, document_.GetAllocator());
 }
 
-std::optional<base::Error> JsonDOM::getError() const
+std::optional<base::Error> JsonDOM::getParseError() const
 {
     if (!document_.HasParseError()) { return std::nullopt; }
 
@@ -356,8 +356,11 @@ static bool isTypeHelper(const rapidjson::Value *value, json::Type type)
             break;
     }
 
-    throw std::runtime_error(fmt::format("Unknown json::Type for isType"));
-    
+    throw std::runtime_error(
+        fmt::format(
+            "Unknown json::Type"
+        )
+    );
 }
 
 bool JsonDOM::isType(std::string_view path, json::Type type) const
@@ -368,10 +371,14 @@ bool JsonDOM::isType(std::string_view path, json::Type type) const
     
     const auto* value = path_ptr.Get(document_);
 
-    return (!value && isTypeHelper(value, type));
+    if (!value) return false;
+
+    // This function can throw a runtime error
+    // If an invalid type is passed
+    return isTypeHelper(value,type);
 }
 
-bool JsonDOM::isEmpty(std::string_view path, json::Type type) const
+bool JsonDOM::isEmpty(std::string_view path) const
 {
     const auto path_ptr = rapidjson::Pointer(path.data());
 
@@ -381,32 +388,25 @@ bool JsonDOM::isEmpty(std::string_view path, json::Type type) const
 
     if (!value) { return false; }
 
-    if (value->IsArray())
+    if (isTypeHelper(value, json::Type::Array))
     {
         return value->Empty();
     }
-    else if (value->IsObject())
+    if (isTypeHelper(value, json::Type::Object))
     {
         return value->ObjectEmpty();
     }
-    else if (value->IsString())
-    {   
-        return value->GetStringLength() == 0;
-    }
-    else if (value->IsNumber())
-    {
-        return value->GetDouble() == 0.0f;
-    }
-    else if (value->IsBool())
-    {
-        return !value->GetBool();
-    }
-    else if (value->IsNull())
+    if (isTypeHelper(value, json::Type::Null))
     {
         return true;
     }
     
-    throw std::runtime_error(fmt::format(INVALID_PTR_TYPE_MSG, path));
+    throw std::runtime_error(
+        fmt::format(
+            "Field '{}' is not an array, object, or null.",
+            path
+        )
+    );
 }
 
 size_t JsonDOM::size(std::string_view path) const

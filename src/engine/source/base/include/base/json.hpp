@@ -105,7 +105,7 @@ public:
     friend bool operator!=(const JsonDOM &lhs, const JsonDOM &rhs)
         { return lhs.document_ != rhs.document_; }
     
-    std::optional<base::Error> getError() const;
+    std::optional<base::Error> getParseError() const;
 
     bool exists(std::string_view ptrPath) const;
 
@@ -150,7 +150,7 @@ public:
 
     bool isType(std::string_view path, json::Type type) const;
 
-    bool isEmpty(std::string_view path, json::Type type) const;
+    bool isEmpty(std::string_view path) const;
 
     size_t size(std::string_view path) const;
 
