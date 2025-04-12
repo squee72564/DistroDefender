@@ -12,7 +12,11 @@ project(
     LANGUAGES CXX
 )
 
-add_compile_options(-Wall -Werror)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-Wall -Werror)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/W4 /WX)
+endif()
 
 set(ENGINE_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
 set(ENGINE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/source)
