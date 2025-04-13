@@ -471,7 +471,7 @@ void JsonDOM::setObject(std::string_view path)
     path_ptr.Set(document_, rapidjson::Value().SetObject(), allocator);
 }
 
-rapidjson::Value& JsonDOM::SetAndGetObject(std::string_view path)
+rapidjson::Value& JsonDOM::setAndGetObject(std::string_view path)
 {
     const auto path_ptr = rapidjson::Pointer(path.data());
 
@@ -497,7 +497,7 @@ void JsonDOM::setArray(std::string_view path)
     path_ptr.Set(document_, rapidjson::Value().SetArray(), allocator);
 }
 
-rapidjson::Value& JsonDOM::SetAndGetArray(std::string_view path)
+rapidjson::Value& JsonDOM::setAndGetArray(std::string_view path)
 {
     const auto path_ptr = rapidjson::Pointer(path.data());
 
