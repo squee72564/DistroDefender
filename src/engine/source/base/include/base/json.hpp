@@ -192,7 +192,33 @@ public:
 
         validatePointer(path_ptr, path);
 
-        path_ptr.Set(document_, std::forward<T>(value));
+        rapidjson::Value v;
+
+        switch(type)
+        {
+            case json::Type::Boolean:
+                v.SetBool(std::forward<T>(value));
+                break;
+            case json::Type::Int:
+                v.SetInt(std::forward<T>(value));
+                break;
+            case json::Type::Int64:
+                v.SetInt64(std::forward<T>(value));
+                break;
+            case json::Type::Float:
+                v.SetFloat(std::forward<T>(value));
+                break;
+            case json::Type::Double:
+                v.SetDouble(std::forward<T>(value));
+                break;
+            case json::Type::String:
+                v.SetString(std::forward<T>(value), document_.GetAllocator());
+                break;
+            default:
+                throw std::runtime_error("Unsupported type for setType.");
+        }
+
+        path_ptr.Set(document_, v);
     }
 
     template <typename T>
@@ -207,7 +233,33 @@ public:
 
         validatePointer(path_ptr, path);
 
-        path_ptr.Set(document_, std::forward<T>(value));
+        rapidjson::Value v;
+
+        switch(type)
+        {
+            case json::Type::Boolean:
+                v.SetBool(std::forward<T>(value));
+                break;
+            case json::Type::Int:
+                v.SetInt(std::forward<T>(value));
+                break;
+            case json::Type::Int64:
+                v.SetInt64(std::forward<T>(value));
+                break;
+            case json::Type::Float:
+                v.SetFloat(std::forward<T>(value));
+                break;
+            case json::Type::Double:
+                v.SetDouble(std::forward<T>(value));
+                break;
+            case json::Type::String:
+                v.SetString(std::forward<T>(value), document_.GetAllocator());
+                break;
+            default:
+                throw std::runtime_error("Unsupported type for setType.");
+        }
+
+        path_ptr.Set(document_, v);
 
         return *path_ptr.Get(document_);
     }
