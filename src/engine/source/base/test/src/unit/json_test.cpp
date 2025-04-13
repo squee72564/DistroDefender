@@ -506,30 +506,50 @@ TEST(JsonTest, setType)
     ASSERT_FALSE(base::isError(err));
 
     json.setType("/i1", 1);
-
     ASSERT_TRUE(json.isType("/i1", json::Type::Int));
     ASSERT_TRUE(json.isType("/i1", json::Type::Int64));
+    ASSERT_TRUE(json.isType("/i1", json::Type::Number));
 
-    json.setType("/i2", 2147483648LL);
-
+    json.setType("/i2", 2147483648LL); // Exceeds int32
     ASSERT_TRUE(json.isType("/i2", json::Type::Int64));
     ASSERT_FALSE(json.isType("/i2", json::Type::Int));
+    ASSERT_TRUE(json.isType("/i2", json::Type::Number));
+
+    json.setType("/u1", static_cast<unsigned>(123456));
+    ASSERT_TRUE(json.isType("/u1", json::Type::Uint));
+    ASSERT_TRUE(json.isType("/u1", json::Type::Uint64));
+    ASSERT_TRUE(json.isType("/u1", json::Type::Number));
+
+    json.setType("/u2", static_cast<uint64_t>(1234567890123456789ULL));
+    ASSERT_TRUE(json.isType("/u2", json::Type::Uint64));
+    ASSERT_FALSE(json.isType("/u2", json::Type::Uint)); // Too large for uint32
+    ASSERT_TRUE(json.isType("/u2", json::Type::Number));
 
     json.setType("/f", false);
-
     ASSERT_TRUE(json.isType("/f", json::Type::Boolean));
 
     json.setType("/float", 3.1416f);
-
     ASSERT_TRUE(json.isType("/float", json::Type::Float));
+    ASSERT_TRUE(json.isType("/float", json::Type::Double));
+    ASSERT_TRUE(json.isType("/float", json::Type::Number));
 
     json.setType("/double", 3.1416);
-
     ASSERT_TRUE(json.isType("/double", json::Type::Double));
+    ASSERT_TRUE(json.isType("/double", json::Type::Number));
 
     json.setType("/hello", "World!");
-
     ASSERT_TRUE(json.isType("/hello", json::Type::String));
+
+    json.setType("/string", std::string("std::string"));
+    ASSERT_TRUE(json.isType("/string", json::Type::String));
+
+    json.setType("/string_view", std::string_view("view"));
+    ASSERT_TRUE(json.isType("/string_view", json::Type::String));
+
+    const char* cstr = "cstring";
+    json.setType("/cstring", cstr);
+    ASSERT_TRUE(json.isType("/cstring", json::Type::String));
+
 }
 
 TEST(JsonTest, erase)
