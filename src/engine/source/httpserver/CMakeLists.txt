@@ -26,7 +26,7 @@ set(TEST_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/test/src)
 set(UNIT_SRC_DIR ${TEST_SRC_DIR}/unit)
 #set(COMPONENT_SRC_DIR ${TEST_SRC_DIR}/component)
 
-add_executable(httpserver_test
+add_executable(httpserver_utest
     ${UNIT_SRC_DIR}/server_test.cpp
 )
 
@@ -38,10 +38,10 @@ target_include_directories(httpserver_utest
 target_link_libraries(httpserver_utest
     PRIVATE
     httpserver
-    Gtest::gtest_main
+    GTest::gtest_main
 )
 
-gtest_discover_tests(httpserver_test)
+gtest_discover_tests(httpserver_utest)
 
 #add_executable(httpserver_ctest
 #    ${COMPONENT_SRC_DIR}/server_test.cpp
@@ -56,7 +56,7 @@ gtest_discover_tests(httpserver_test)
 #target_link_libraries(httpserver_ctest
 #    PRIVATE
 #    httpserver
-#    Gtest::gtest_main
+#    GTest::gtest_main
 #    base::test
 #)
 #

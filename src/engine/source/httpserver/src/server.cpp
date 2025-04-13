@@ -1,6 +1,6 @@
 #include "server.hpp"
 
-#include <base/logging.hpp>
+#include <base/logger.hpp>
 
 namespace httpserver
 {
@@ -12,7 +12,7 @@ namespace
 
 Server::Server(std::string id)
     : server_{std::make_shared<httplib::Server>()}
-    , id_{std::move(id}
+    , id_{std::move(id)}
 {
     // Set the exception handler for the server
     auto exceptFnName = fmt::format("Server::Server({})::set_exception_handler", id);
@@ -27,7 +27,7 @@ Server::Server(std::string id)
             catch (std::exception& e)
             {
                 LOG_ERROR_L(
-                    exceptFnFame.c_str(),
+                    exceptFnName.c_str(),
                     fmt::format("Server {} uncaught route handler exception: {}", id, e.what())
                 );
             }
@@ -45,13 +45,18 @@ Server::Server(std::string id)
     );
 
     // Add logger function to server
-    auto loggerFnName = fmt::Format("Server::Server({})::set_logger", id);
+    auto loggerFnName = fmt::format("Server::Server({})::set_logger", id);
     server_->set_logger(
-        [id, setLoggerFnName] (const httplib::Request& req, const httplib::Response& res)
+        [id, loggerFnName] (const httplib::Request& req, const httplib::Response& res)
         {
-            LOG_TRACE_L(loggerFnName.cstr(), "Server {} request recieved", id);
+            LOG_TRACE_L(loggerFnName.c_str(), "Server {} request recieved", id);
         }
     );
+}
+
+Server::~Server()
+{
+    stop();
 }
 
 void Server::start(const std::filesystem::path& socketPath, bool useThread)
@@ -87,12 +92,12 @@ void Server::start(const std::filesystem::path& socketPath, bool useThread)
         );
     }
 
-    server_->set_address_family(httplib::AD_UNIX);
+    server_->set_address_family(AF_UNIX);
 
     if (std::filesystem::exists(socketPath.string()))
     {
-        std::filesysystem.remove(socketPath);
-        LOG_TRACE("Server {} removed existing socket file {}", id_, socketPath);
+        std::filesystem::remove(socketPath);
+        LOG_TRACE("Server {} removed existing socket file {}", id_, socketPath.string());
     }
 
     if (useThread)
@@ -104,19 +109,19 @@ void Server::start(const std::filesystem::path& socketPath, bool useThread)
             }
         );
 
-        server->wait_until_ready();
+        server_->wait_until_ready();
 
 
         auto thread_id = thread_.get_id();
 
         std::stringstream ss;
-        ss << tid;
+        ss << thread_id;
 
-        LOG_INFO("Server {} started in thread {} at {}", id_ ss.str(), socketPath)
+        LOG_INFO("Server {} started in thread {} at {}", id_, ss.str(), socketPath.string());
     }
     else
     {
-        LOG_INFO("Server {} started at {}", is_, socketPath.string());
+        LOG_INFO("Server {} started at {}", id_, socketPath.string());
         server_->listen(socketPath, true);
     }
 }
@@ -125,7 +130,7 @@ void Server::stop()
 {
     try 
     {
-        server->stop();
+        server_->stop();
 
         if (thread_.joinable()) thread_.join();
 
@@ -138,27 +143,28 @@ void Server::stop()
     }
 }
 
-void Server::addRoute(Method method, std::string& route, httplib::Handler handler)
+void Server::addRoute(Method method, const std::string& route, httplib::Server::Handler handler)
 {
     switch (method)
     {
-        case Method::Get:       m_srv->Get(route, handler); break;
-        case Method::POST:      m_srv->Post(route, handler); break;
-        case Method::PUT:       m_srv->Put(route, handler); break;
-        case Method::DELETE:    m_srv->(route, handler); break;
+        case Method::GET:       server_->Get(route, handler); break;
+        case Method::POST:      server_->Post(route, handler); break;
+        case Method::PUT:       server_->Put(route, handler); break;
+        case Method::DELETE:    server_->Delete(route, handler); break;
         default:
             throw std::runtime_error(
                 fmt::format(
-                    "Server {} failed to add route {} : {}", id_, route, "Invalid Method");
+                    "Server {} failed to add route {} : {}", id_, route, "Invalid Method"
                 )
             );
     }
 
-    LOG_DEBUG("Server {} added route {} {}", id_, route. methodToStr(method));
+    LOG_DEBUG("Server {} added route {} {}", id_, route, methodToStr(method));
 }
 
-inline bool Server::isRunning() const
+bool Server::isRunning() const noexcept
 {
     return server_->is_running();
 }
+
 } // namespace httpserver
