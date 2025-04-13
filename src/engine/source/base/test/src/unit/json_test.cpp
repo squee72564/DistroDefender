@@ -412,6 +412,181 @@ TEST(JsonTest, size)
     ASSERT_FALSE(base::isError(err));
 
     ASSERT_TRUE(4 == jsonObj.size("/o2"));
+}
 
 
+TEST(JsonTest, setNull)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.setNull("/a");
+
+    ASSERT_TRUE(json.isType("/a", json::Type::Null));
+}
+
+TEST(JsonTest, setEmpty)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.setEmpty("/a");
+
+    ASSERT_TRUE(json.isEmpty("/a"));
+}
+
+TEST(JsonTest, setObject)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.setObject("/a");
+    
+    ASSERT_TRUE(json.isType("/a", json::Type::Object));
+}
+
+TEST(JsonTest, setAndGetObject)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    auto&& obj = json.setAndGetObject("/a");
+    
+    ASSERT_TRUE(json.isType("/a", json::Type::Object));
+
+    ASSERT_TRUE(obj.IsObject());
+}
+
+TEST(JsonTest, setArray)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.setArray("/a");
+    
+    ASSERT_TRUE(json.isType("/a", json::Type::Array));
+}
+
+TEST(JsonTest, setAndGetArray)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    auto&& arr = json.setAndGetArray("/a");
+    
+    ASSERT_TRUE(json.isType("/a", json::Type::Array));
+
+    ASSERT_TRUE(arr.IsArray());
+}
+
+TEST(JsonTest, setType)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.setType("/i1", 1);
+
+    ASSERT_TRUE(json.isType("/i1", json::Type::Int));
+    ASSERT_TRUE(json.isType("/i1", json::Type::Int64));
+
+    json.setType("/i2", 2147483648LL);
+
+    ASSERT_TRUE(json.isType("/i2", json::Type::Int64));
+    ASSERT_FALSE(json.isType("/i2", json::Type::Int));
+
+    json.setType("/f", false);
+
+    ASSERT_TRUE(json.isType("/f", json::Type::Boolean));
+
+    json.setType("/float", 3.1416f);
+
+    ASSERT_TRUE(json.isType("/float", json::Type::Float));
+
+    json.setType("/double", 3.1416);
+
+    ASSERT_TRUE(json.isType("/double", json::Type::Double));
+
+    json.setType("/hello", "World!");
+
+    ASSERT_TRUE(json.isType("/hello", json::Type::String));
+}
+
+TEST(JsonTest, erase)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+    
+    ASSERT_TRUE(json.erase("/t"));
+    ASSERT_FALSE(json.erase("/t"));
+    ASSERT_FALSE(json.erase("/non_existent"));
+}
+
+TEST(JsonTest, validate)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    // Valid schema
+    const char* validSchemaStr = R"({
+        "type": "object",
+        "properties": {
+            "name": { "type": "string" },
+            "age": { "type": "integer" }
+        },
+        "required": ["name", "age"]
+    })";
+
+    // Valid JSON
+    const char* validJsonStr = R"({
+        "name": "John",
+        "age": 30
+    })";
+
+    // Invalid JSON (missing 'age' field)
+    const char* invalidJsonStr = R"({
+        "name": "John"
+    })";
+
+    // Invalid JSON (misstype 'age' field)
+    const char* invalidJsonStr2 = R"({
+        "name": "John"
+        "age": 123
+    })";
+
+    json::Json validSchema{validSchemaStr};
+    json::Json invalidJson{invalidJsonStr};
+    json::Json invalidJson2{invalidJsonStr2};
+    json::Json validJsonObj{validJsonStr};
+
+    err = validJsonObj.validate(validSchema);
+    ASSERT_FALSE(base::isError(err));
+
+    err = invalidJson.validate(validSchema);
+    ASSERT_TRUE(base::isError(err));
+
+    err = invalidJson2.validate(validSchema);
+    ASSERT_TRUE(base::isError(err));
 }
