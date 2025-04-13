@@ -70,12 +70,16 @@ struct is_rapidjson_trivially_settable : std::disjunction<
     std::is_same<std::decay_t<T>, unsigned>,
     std::is_same<std::decay_t<T>, int64_t>,
     std::is_same<std::decay_t<T>, uint64_t>,
+    std::is_same<std::decay_t<T>, float>,
     std::is_same<std::decay_t<T>, double>,
     std::is_same<std::decay_t<T>, bool>,
     std::is_same<std::decay_t<T>, const char*>,
     std::is_same<std::decay_t<T>, std::string_view>,
     std::is_same<std::decay_t<T>, std::string>
 > {};
+
+template <typename>
+struct dependent_false : std::false_type {};
 
 } // namespace
 
@@ -174,14 +178,14 @@ public:
 
     void setObject(std::string_view path);
 
-    rapidjson::Value& SetAndGetObject(std::string_view path);
+    rapidjson::Value& setAndGetObject(std::string_view path);
 
     void setArray(std::string_view path);
 
-    rapidjson::Value& SetAndGetArray(std::string_view path);
+    rapidjson::Value& setAndGetArray(std::string_view path);
 
     template <typename T>
-    void setType(T&& value, json::Type type, std::string_view path)
+    void setType(std::string_view path, T&& value)
     {
         static_assert(
             is_rapidjson_trivially_settable<T>::value,
@@ -194,35 +198,47 @@ public:
 
         rapidjson::Value v;
 
-        switch(type)
-        {
-            case json::Type::Boolean:
-                v.SetBool(std::forward<T>(value));
-                break;
-            case json::Type::Int:
-                v.SetInt(std::forward<T>(value));
-                break;
-            case json::Type::Int64:
-                v.SetInt64(std::forward<T>(value));
-                break;
-            case json::Type::Float:
-                v.SetFloat(std::forward<T>(value));
-                break;
-            case json::Type::Double:
-                v.SetDouble(std::forward<T>(value));
-                break;
-            case json::Type::String:
-                v.SetString(std::forward<T>(value), document_.GetAllocator());
-                break;
-            default:
-                throw std::runtime_error("Unsupported type for setType.");
+        if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
+            v.SetBool(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, int>) {
+            v.SetInt(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>) {
+            v.SetInt64(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, unsigned>) {
+            v.SetUint(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, uint64_t>) {
+            v.SetUint64(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, float>) {
+            v.SetFloat(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, double>) {
+            v.SetDouble(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, const char*>) {
+            v.SetString(
+                value,
+                static_cast<rapidjson::SizeType>(std::strlen(value)),
+                document_.GetAllocator()
+            );
+        } else if constexpr (std::is_same_v<std::decay_t<T>, std::string_view>) {
+            v.SetString(
+                value.data(),
+                static_cast<rapidjson::SizeType>(value.size()),
+                document_.GetAllocator()
+            );
+        } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
+            v.SetString(
+                value.c_str(),
+                static_cast<rapidjson::SizeType>(value.size()),
+                document_.GetAllocator()
+            );
+        } else {
+            static_assert(dependent_false<T>::value, "Unhandled type in setType");
         }
 
         path_ptr.Set(document_, v);
     }
 
     template <typename T>
-    rapidjson::Value& setAndGetType(T&& value, json::Type type, std::string_view path)
+    rapidjson::Value& setAndGetType(std::string_view path, T&& value)
     {
         static_assert(
             is_rapidjson_trivially_settable<T>::value,
@@ -235,28 +251,40 @@ public:
 
         rapidjson::Value v;
 
-        switch(type)
-        {
-            case json::Type::Boolean:
-                v.SetBool(std::forward<T>(value));
-                break;
-            case json::Type::Int:
-                v.SetInt(std::forward<T>(value));
-                break;
-            case json::Type::Int64:
-                v.SetInt64(std::forward<T>(value));
-                break;
-            case json::Type::Float:
-                v.SetFloat(std::forward<T>(value));
-                break;
-            case json::Type::Double:
-                v.SetDouble(std::forward<T>(value));
-                break;
-            case json::Type::String:
-                v.SetString(std::forward<T>(value), document_.GetAllocator());
-                break;
-            default:
-                throw std::runtime_error("Unsupported type for setType.");
+        if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
+            v.SetBool(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, int>) {
+            v.SetInt(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>) {
+            v.SetInt64(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, unsigned>) {
+            v.SetUint(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, uint64_t>) {
+            v.SetUint64(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, float>) {
+            v.SetFloat(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, double>) {
+            v.SetDouble(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, const char*>) {
+            v.SetString(
+                value,
+                static_cast<rapidjson::SizeType>(std::strlen(value)),
+                document_.GetAllocator()
+            );
+        } else if constexpr (std::is_same_v<std::decay_t<T>, std::string_view>) {
+            v.SetString(
+                value.data(),
+                static_cast<rapidjson::SizeType>(value.size()),
+                document_.GetAllocator()
+            );
+        } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
+            v.SetString(
+                value.c_str(),
+                static_cast<rapidjson::SizeType>(value.size()),
+                document_.GetAllocator()
+            );
+        } else {
+            static_assert(dependent_false<T>::value, "Unhandled type in setType");
         }
 
         path_ptr.Set(document_, v);
