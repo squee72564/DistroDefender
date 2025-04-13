@@ -117,6 +117,19 @@ std::optional<std::string> JsonDOM::getString(std::string_view path) const
         ? std::optional{value->GetString()} : std::nullopt;
 }
 
+std::optional<bool> JsonDOM::getBool(std::string_view path) const
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    const auto* value = path_ptr.Get(document_);
+
+    return (value && value->IsBool())
+        ? std::optional{value->GetBool()} : std::nullopt;
+}
+
+
 std::optional<std::int32_t> JsonDOM::getInt32(std::string_view path) const
 {
     const auto path_ptr = rapidjson::Pointer(path.data());
@@ -127,6 +140,18 @@ std::optional<std::int32_t> JsonDOM::getInt32(std::string_view path) const
 
     return (value && value->IsInt())
         ? std::optional{value->GetInt()} : std::nullopt;
+}
+
+std::optional<std::uint32_t> JsonDOM::getUint32(std::string_view path) const
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    const auto* value = path_ptr.Get(document_);
+
+    return (value && value->IsUint())
+        ? std::optional{value->GetUint()} : std::nullopt;
 }
 
 std::optional<std::int64_t> JsonDOM::getInt64(std::string_view path) const
@@ -141,6 +166,18 @@ std::optional<std::int64_t> JsonDOM::getInt64(std::string_view path) const
         ? std::optional{value->GetInt64()} : std::nullopt;
 }
 
+std::optional<std::uint64_t> JsonDOM::getUint64(std::string_view path) const
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    const auto* value = path_ptr.Get(document_);
+
+    return (value && value->IsUint64())
+        ? std::optional{value->GetUint64()} : std::nullopt;
+}
+
 std::optional<std::int64_t> JsonDOM::getIntAsInt64(std::string_view path) const
 {
     const auto path_ptr = rapidjson::Pointer(path.data());
@@ -153,6 +190,22 @@ std::optional<std::int64_t> JsonDOM::getIntAsInt64(std::string_view path) const
         return value->GetInt64();
     else if (value && value->IsInt())
         return static_cast<std::int64_t>(value->GetInt());
+
+    return std::nullopt;
+}
+
+std::optional<std::uint64_t> JsonDOM::getUintAsUint64(std::string_view path) const
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    const auto* value = path_ptr.Get(document_);
+
+    if (value && value->IsUint64())
+        return value->GetUint64();
+    else if (value && value->IsUint())
+        return static_cast<std::uint64_t>(value->GetInt());
 
     return std::nullopt;
 }
@@ -179,38 +232,6 @@ std::optional<double> JsonDOM::getDouble(std::string_view path) const
 
     return (value && value->IsDouble())
         ? std::optional{value->GetDouble()} : std::nullopt;
-}
-
-std::optional<double> JsonDOM::getNumberAsDouble(std::string_view path) const
-{
-    const auto path_ptr = rapidjson::Pointer(path.data());
-
-    validatePointer(path_ptr, path);
-
-    const auto* value = path_ptr.Get(document_);
-
-    if (!value || !value->IsNumber()) { return std::nullopt; }
-
-    if (value->IsInt())
-        return static_cast<double>(value->GetInt());
-    else if (value->IsInt64())
-        return static_cast<double>(value->GetInt64());
-    else if (value->IsFloat())
-        return static_cast<double>(value->GetFloat());
-
-    return value->GetDouble();
-}
-
-std::optional<bool> JsonDOM::getBool(std::string_view path) const
-{
-    const auto path_ptr = rapidjson::Pointer(path.data());
-
-    validatePointer(path_ptr, path);
-
-    const auto* value = path_ptr.Get(document_);
-
-    return (value && value->IsBool())
-        ? std::optional{value->GetBool()} : std::nullopt;
 }
 
 std::optional<std::vector<JsonDOM>> JsonDOM::getArray(std::string_view path) const
