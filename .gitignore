@@ -31,3 +31,6 @@ src/engine/vcpkg_installed/
 documentation/
 doxygen_config.cfg
 doxygen_errors.txt
+
+# bash scripts
+src/engine/*.sh
