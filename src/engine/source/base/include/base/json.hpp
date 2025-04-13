@@ -87,17 +87,17 @@ enum Type {
     Null = 0,
     Object,
     Array,
-    Empty,
     String,
+    Boolean,
     Number,
     Int,
+    Uint,
     Int64,
-    Double,
+    Uint64,
     Float,
-    Boolean,
+    Double,
     Unknown
 };
-    
 class JsonDOM
 {
 public:
