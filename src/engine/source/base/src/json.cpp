@@ -342,17 +342,18 @@ static bool isTypeHelper(const rapidjson::Value *value, json::Type type)
 {
     switch (type)
     {
-        case json::Type::Empty:
         case json::Type::Null:      return value->IsNull();
         case json::Type::Object:    return value->IsObject();
         case json::Type::Array:     return value->IsArray();
         case json::Type::String:    return value->IsString();
+        case json::Type::Boolean:   return value->IsBool();
         case json::Type::Number:    return value->IsNumber();
         case json::Type::Int:       return value->IsInt();
+        case json::Type::Uint:      return value->IsUint();
         case json::Type::Int64:     return value->IsInt64();
-        case json::Type::Double:    return value->IsDouble();
+        case json::Type::Uint64:    return value->IsUint64();
         case json::Type::Float:     return value->IsFloat();
-        case json::Type::Boolean:   return value->IsBool();
+        case json::Type::Double:    return value->IsDouble();
         case json::Type::Unknown:
         default:
             break;
