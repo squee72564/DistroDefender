@@ -64,12 +64,26 @@ static inline void validatePointer(const rapidjson::Pointer& ptr, std::string_vi
     );
 }
 
+template <typename T>
+struct is_rapidjson_trivially_settable : std::disjunction<
+    std::is_same<std::decay_t<T>, int>,
+    std::is_same<std::decay_t<T>, unsigned>,
+    std::is_same<std::decay_t<T>, int64_t>,
+    std::is_same<std::decay_t<T>, uint64_t>,
+    std::is_same<std::decay_t<T>, double>,
+    std::is_same<std::decay_t<T>, bool>,
+    std::is_same<std::decay_t<T>, const char*>,
+    std::is_same<std::decay_t<T>, std::string_view>,
+    std::is_same<std::decay_t<T>, std::string>
+> {};
+
 } // namespace
 
 enum Type {
     Null = 0,
     Object,
     Array,
+    Empty,
     String,
     Number,
     Int,
@@ -154,36 +168,48 @@ public:
 
     size_t size(std::string_view path) const;
 
+    void setNull(std::string_view path);
+
+    void setEmpty(std::string_view path);
+
+    void setObject(std::string_view path);
+
+    rapidjson::Value& SetAndGetObject(std::string_view path);
+
+    void setArray(std::string_view path);
+
+    rapidjson::Value& SetAndGetArray(std::string_view path);
+
     template <typename T>
     void setType(T&& value, json::Type type, std::string_view path)
     {
+        static_assert(
+            is_rapidjson_trivially_settable<T>::value,
+            "type T must be trivially settable into a rapidjson::Value object"
+        );
+
         const auto path_ptr = rapidjson::Pointer(path.data());
 
         validatePointer(path_ptr, path);
 
-        switch (type)
-        {
-            case json::Type::Null:
-                path_ptr.Set(document_, rapidjson::Value().SetNull());
-                break;
-            case json::Type::Object: 
-                path_ptr.Set(document_, rapidjson::Value().SetObject());
-                break;
-            case json::Type::Array:
-                path_ptr.Set(document_, rapidjson::Value().SetArray());
-                break;
-            case json::Type::String:
-            case json::Type::Number:
-            case json::Type::Int:
-            case json::Type::Int64:
-            case json::Type::Double:
-            case json::Type::Float:
-            case json::Type::Boolean:
-                path_ptr.Set(document_, std::forward<T>(value));
-                break;
-            case json::Type::Unknown:
-                break;
-        }
+        path_ptr.Set(document_, std::forward<T>(value));
+    }
+
+    template <typename T>
+    rapidjson::Value& setAndGetType(T&& value, json::Type type, std::string_view path)
+    {
+        static_assert(
+            is_rapidjson_trivially_settable<T>::value,
+            "type T must be trivially settable into a rapidjson::Value object"
+        );
+
+        const auto path_ptr = rapidjson::Pointer(path.data());
+
+        validatePointer(path_ptr, path);
+
+        path_ptr.Set(document_, std::forward<T>(value));
+
+        return *path_ptr.Get(document_);
     }
 
     bool erase(std::string_view path);

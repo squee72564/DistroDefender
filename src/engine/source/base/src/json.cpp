@@ -342,6 +342,7 @@ static bool isTypeHelper(const rapidjson::Value *value, json::Type type)
 {
     switch (type)
     {
+        case json::Type::Empty:
         case json::Type::Null:      return value->IsNull();
         case json::Type::Object:    return value->IsObject();
         case json::Type::Array:     return value->IsArray();
@@ -353,6 +354,7 @@ static bool isTypeHelper(const rapidjson::Value *value, json::Type type)
         case json::Type::Float:     return value->IsFloat();
         case json::Type::Boolean:   return value->IsBool();
         case json::Type::Unknown:
+        default:
             break;
     }
 
@@ -439,6 +441,77 @@ size_t JsonDOM::size(std::string_view path) const
         throw std::runtime_error(fmt::format("Size of field '{}' is not measurable.", path));
     }
 }
+
+void JsonDOM::setNull(std::string_view path)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    path_ptr.Set(document_, rapidjson::Value().SetNull());
+}
+
+void JsonDOM::setEmpty(std::string_view path)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    path_ptr.Set(document_, rapidjson::Value());
+}
+
+void JsonDOM::setObject(std::string_view path)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    auto& allocator = document_.GetAllocator();
+
+    path_ptr.Set(document_, rapidjson::Value().SetObject(), allocator);
+}
+
+rapidjson::Value& JsonDOM::SetAndGetObject(std::string_view path)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    auto& allocator = document_.GetAllocator();
+
+    rapidjson::Value obj(rapidjson::kObjectType);
+
+    path_ptr.Set(document_, obj, allocator);
+
+    return *path_ptr.Get(document_);
+}
+
+void JsonDOM::setArray(std::string_view path)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    auto& allocator = document_.GetAllocator();
+
+    path_ptr.Set(document_, rapidjson::Value().SetArray(), allocator);
+}
+
+rapidjson::Value& JsonDOM::SetAndGetArray(std::string_view path)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    auto& allocator = document_.GetAllocator();
+
+    rapidjson::Value obj(rapidjson::kArrayType);
+
+    path_ptr.Set(document_, obj, allocator);
+
+    return *path_ptr.Get(document_);
+}
+
 
 bool JsonDOM::erase(std::string_view path)
 {
