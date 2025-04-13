@@ -137,19 +137,23 @@ public:
 
     std::optional<std::string> getString(std::string_view path) const;
 
+    std::optional<bool> getBool(std::string_view path) const;
+
     std::optional<std::int32_t> getInt32(std::string_view path) const;
+
+    std::optional<std::uint32_t> getUint32(std::string_view path) const;
 
     std::optional<std::int64_t> getInt64(std::string_view path) const;
 
+    std::optional<std::uint64_t> getUint64(std::string_view path) const;
+
     std::optional<std::int64_t> getIntAsInt64(std::string_view path) const;
+
+    std::optional<std::uint64_t> getUintAsUint64(std::string_view path) const;
 
     std::optional<float> getFloat(std::string_view path) const;
 
     std::optional<double> getDouble(std::string_view path) const;
-
-    std::optional<double> getNumberAsDouble(std::string_view path) const;
-
-    std::optional<bool> getBool(std::string_view path) const;
 
     std::optional<std::vector<JsonDOM>> getArray(std::string_view path) const;
 
