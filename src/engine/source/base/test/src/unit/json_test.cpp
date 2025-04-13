@@ -607,21 +607,33 @@ TEST(JsonTest, validate)
 
     // Invalid JSON (misstype 'age' field)
     const char* invalidJsonStr2 = R"({
-        "name": "John"
-        "age": 123
+        "name": "John",
+        "age": "123"
     })";
 
+    // Create schema
     json::Json validSchema{validSchemaStr};
-    json::Json invalidJson{invalidJsonStr};
-    json::Json invalidJson2{invalidJsonStr2};
-    json::Json validJsonObj{validJsonStr};
-
-    err = validJsonObj.validate(validSchema);
+    err = validSchema.getParseError();
     ASSERT_FALSE(base::isError(err));
 
+    // Try invalid json
+    json::Json invalidJson{invalidJsonStr};
+    err = invalidJson.getParseError();
+    ASSERT_FALSE(base::isError(err));
     err = invalidJson.validate(validSchema);
     ASSERT_TRUE(base::isError(err));
 
+    // Try invalid json 2
+    json::Json invalidJson2{invalidJsonStr2};
+    err = invalidJson2.getParseError();
+    ASSERT_FALSE(base::isError(err));
     err = invalidJson2.validate(validSchema);
     ASSERT_TRUE(base::isError(err));
+
+    // Try a valid json
+    json::Json validJsonObj{validJsonStr};
+    err = validJsonObj.getParseError();
+    ASSERT_FALSE(base::isError(err));
+    err = validJsonObj.validate(validSchema);
+    ASSERT_FALSE(base::isError(err));
 }
