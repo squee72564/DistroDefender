@@ -26,24 +26,6 @@ constexpr auto INVALID_PTR_TYPE_MSG = "INVALID pointer path '{}'";
 
 constexpr auto INVALID_PTR_PARSE_MSG = "Could not parse '{}' at offset {}: {}";
 
-//const char* GetPointerParseError_En(rapidjson::PointerParseErrorCode code)
-//{
-//    switch (code) {
-//        case rapidjson::kPointerParseErrorNone:
-//            return "No error.";
-//        case rapidjson::kPointerParseErrorTokenMustBeginWithSolidus:
-//            return "A token must begin with a '/'.";
-//        case rapidjson::kPointerParseErrorInvalidEscape:
-//            return "Invalid escape sequence.";
-//        case rapidjson::kPointerParseErrorInvalidPercentEncoding:
-//            return "Invalid percent encoding in URI fragment.";
-//        case rapidjson::kPointerParseErrorCharacterMustPercentEncode:
-//            return "Character must be percent-encoded in URI fragment.";
-//        default:
-//            return "Unknown pointer parse error.";
-//    }
-//}
-
 static inline void validatePointer(const rapidjson::Pointer& ptr, std::string_view ptr_path)
 {
     if (ptr.IsValid())
