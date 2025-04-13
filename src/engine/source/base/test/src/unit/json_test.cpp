@@ -184,6 +184,27 @@ TEST(JsonTest, getString)
     ASSERT_TRUE(s.value() == "world");
 }
 
+TEST(JsonTest, getBool)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{jsonStr};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    ASSERT_TRUE(json.isType("/f", json::Type::Boolean));
+    
+    std::optional<bool> val = json.getBool("/f");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val == false);
+
+    ASSERT_FALSE(json.isType("/hello", json::Type::Boolean));
+
+    val = json.getBool("/hello");
+    ASSERT_FALSE(val.has_value());
+}
+
 TEST(JsonTest, getInt32)
 {
     std::optional<base::Error> err{ base::Error{} };
@@ -200,6 +221,24 @@ TEST(JsonTest, getInt32)
     ASSERT_TRUE(val.value() == 123);
 }
 
+TEST(JsonTest, getUint32)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.setType("/ui32", static_cast<std::uint32_t>(123));
+
+    ASSERT_TRUE(json.isType("/ui32", json::Type::Uint));
+    
+    std::optional<std::uint32_t> val = json.getInt32("/ui32");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val.value() == 123);
+}
+
 TEST(JsonTest, getInt64)
 {
     std::optional<base::Error> err{ base::Error{} };
@@ -211,6 +250,24 @@ TEST(JsonTest, getInt64)
     ASSERT_TRUE(json.isType("/i", json::Type::Int64));
     
     std::optional<std::int64_t> val = json.getInt64("/i");
+
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val.value() == 123);
+}
+
+TEST(JsonTest, getUint64)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+
+    json.setType("/ui64", static_cast<std::uint64_t>(123));
+
+    ASSERT_TRUE(json.isType("/ui64", json::Type::Uint64));
+    
+    std::optional<std::uint64_t> val = json.getInt32("/ui64");
 
     ASSERT_TRUE(val.has_value());
     ASSERT_TRUE(val.value() == 123);
@@ -246,48 +303,6 @@ TEST(JsonTest, getDouble)
 
     ASSERT_TRUE(val.has_value());
     ASSERT_TRUE(val == 3.1416);
-}
-
-TEST(JsonTest, getNumberAsDouble)
-{
-    std::optional<base::Error> err{ base::Error{} };
-
-    json::Json json{jsonStr};
-    err = json.getParseError();
-    ASSERT_FALSE(base::isError(err));
-
-    ASSERT_TRUE(json.isType("/pi", json::Type::Double));
-    
-    std::optional<double> val = json.getDouble("/pi");
-
-    ASSERT_TRUE(val.has_value());
-    ASSERT_TRUE(val == 3.1416);
-
-    ASSERT_FALSE(json.isType("/hello", json::Type::Double));
-
-    val = json.getNumberAsDouble("/hello");
-    ASSERT_FALSE(val.has_value());
-}
-
-TEST(JsonTest, getBool)
-{
-    std::optional<base::Error> err{ base::Error{} };
-
-    json::Json json{jsonStr};
-    err = json.getParseError();
-    ASSERT_FALSE(base::isError(err));
-
-    ASSERT_TRUE(json.isType("/f", json::Type::Boolean));
-    
-    std::optional<bool> val = json.getBool("/f");
-
-    ASSERT_TRUE(val.has_value());
-    ASSERT_TRUE(val == false);
-
-    ASSERT_FALSE(json.isType("/hello", json::Type::Boolean));
-
-    val = json.getBool("/hello");
-    ASSERT_FALSE(val.has_value());
 }
 
 TEST(JsonText, getArray)
