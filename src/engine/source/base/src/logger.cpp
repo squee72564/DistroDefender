@@ -186,4 +186,16 @@ void stop()
    spdlog::shutdown();
 }
 
+void testInit(LogLevel level)
+{
+    auto logger = spdlog::get("default");
+
+    if (!logger)
+    {
+        LoggerConfig logConfig;
+        logConfig.level = level;
+        start(logConfig);
+    }
+}
+
 } // namespace logger

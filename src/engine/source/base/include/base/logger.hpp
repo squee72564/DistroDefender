@@ -118,6 +118,8 @@ void start(const LoggerConfig& cfg);
  */
 void stop();
 
+void testInit(LogLevel level = LogLevel::Warn);
+
 } // namespace logger
 
 #define LOG_TRACE(msg, ...)                                                                                            \
@@ -138,5 +140,24 @@ void stop();
 #define LOG_CRITICAL(msg, ...)                                                                                         \
     logger::getDefaultLogger()->log(                                                                                  \
         spdlog::source_loc {__FILE__, __LINE__, SPDLOG_FUNCTION}, spdlog::level::critical, msg, ##__VA_ARGS__)
+
+#define LOG_TRACE_L(functionName, msg, ...)                                                                            \
+    logging::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, functionName}, spdlog::level::trace, msg, ##__VA_ARGS__)
+#define LOG_DEBUG_L(functionName, msg, ...)                                                                            \
+    logging::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, functionName}, spdlog::level::debug, msg, ##__VA_ARGS__)
+#define LOG_INFO_L(functionName, msg, ...)                                                                             \
+    logging::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, functionName}, spdlog::level::info, msg, ##__VA_ARGS__)
+#define LOG_WARNING_L(functionName, msg, ...)                                                                          \
+    logging::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, functionName}, spdlog::level::warn, msg, ##__VA_ARGS__)
+#define LOG_ERROR_L(functionName, msg, ...)                                                                            \
+    logging::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, functionName}, spdlog::level::err, msg, ##__VA_ARGS__)
+#define LOG_CRITICAL_L(functionName, msg, ...)                                                                         \
+    logging::getDefaultLogger()->log(                                                                                  \
+        spdlog::source_loc {__FILE__, __LINE__, functionName}, spdlog::level::critical, msg, ##__VA_ARGS__)
 
 #endif // _LOGGER_HPP
