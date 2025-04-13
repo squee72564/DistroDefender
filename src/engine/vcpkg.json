@@ -3,6 +3,7 @@
         "spdlog",
         "gtest",
         "fmt",
-        "rapidjson"
+        "rapidjson",
+        "cpp-httplib"
     ]
 }
