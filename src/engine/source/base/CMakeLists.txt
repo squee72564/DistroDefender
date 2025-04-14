@@ -10,6 +10,8 @@ set(INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 add_library(base STATIC
     ${SRC_DIR}/logger.cpp
     ${SRC_DIR}/json.cpp
+
+    ${SRC_DIR}/utils/stringUtils.cpp
 )
 
 target_include_directories(base
@@ -17,12 +19,13 @@ target_include_directories(base
     ${INC_DIR}
 
     PRIVATE
-    ${INC_DIR}
+    ${INC_DIR}/base
     ${SRC_DIR}
 )
 
 target_link_libraries(base
     PUBLIC
+    fmt::fmt-header-only
     spdlog::spdlog
 )
 
@@ -42,6 +45,7 @@ if(ENGINE_BUILD_TEST)
     add_executable(base_utest
         ${UNIT_SRC_DIR}/error_test.cpp
         ${UNIT_SRC_DIR}/json_test.cpp
+        ${UNIT_SRC_DIR}/stringUtils_test.cpp
     )
 
     target_include_directories(base_utest
