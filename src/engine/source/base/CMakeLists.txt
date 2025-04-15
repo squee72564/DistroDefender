@@ -12,6 +12,7 @@ add_library(base STATIC
     ${SRC_DIR}/json.cpp
 
     ${SRC_DIR}/utils/stringUtils.cpp
+    ${SRC_DIR}/utils/timeUtils.cpp
 )
 
 target_include_directories(base
@@ -46,6 +47,7 @@ if(ENGINE_BUILD_TEST)
         ${UNIT_SRC_DIR}/error_test.cpp
         ${UNIT_SRC_DIR}/json_test.cpp
         ${UNIT_SRC_DIR}/stringUtils_test.cpp
+        ${UNIT_SRC_DIR}/timeUtils_test.cpp
     )
 
     target_include_directories(base_utest
