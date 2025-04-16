@@ -47,7 +47,8 @@ if(ENGINE_BUILD_TEST)
         ${UNIT_SRC_DIR}/error_test.cpp
         ${UNIT_SRC_DIR}/json_test.cpp
         ${UNIT_SRC_DIR}/stringUtils_test.cpp
-        ${UNIT_SRC_DIR}/timeUtils_test.cpp
+        ${UNIT_SRC_DIR}/utils/timeUtils_test.cpp
+        ${UNIT_SRC_DIR}/utils/singletonLocator_test.cpp
     )
 
     target_include_directories(base_utest
