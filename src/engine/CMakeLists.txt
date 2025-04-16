@@ -13,9 +13,9 @@ project(
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    add_compile_options(-Wall -Werror)
+    add_compile_options(-Wall -Werror -O3)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4 /WX /0x)
 endif()
 
 set(ENGINE_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
