@@ -25,7 +25,7 @@ public:
 
     ~PtrSingleton() override = default;
 
-    IInstance instance() override { return static_cast<IInstance&>(*m_instance); }
+    IInstance& instance() override { return static_cast<IInstance&>(*m_instance); }
 };
 
 } // namespace base
