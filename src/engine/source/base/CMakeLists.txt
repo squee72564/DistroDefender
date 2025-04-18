@@ -47,6 +47,8 @@ if(ENGINE_BUILD_TEST)
         ${UNIT_SRC_DIR}/error_test.cpp
         ${UNIT_SRC_DIR}/json_test.cpp
         ${UNIT_SRC_DIR}/stringUtils_test.cpp
+        ${UNIT_SRC_DIR}/name_test.cpp
+        ${UNIT_SRC_DIR}/dotPath_test.cpp
         ${UNIT_SRC_DIR}/utils/timeUtils_test.cpp
         ${UNIT_SRC_DIR}/utils/singletonLocator_test.cpp
     )
