@@ -10,6 +10,7 @@ set(INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 add_library(base STATIC
     ${SRC_DIR}/logger.cpp
     ${SRC_DIR}/json.cpp
+    ${SRC_DIR}/expression.cpp
 
     ${SRC_DIR}/utils/stringUtils.cpp
     ${SRC_DIR}/utils/timeUtils.cpp
