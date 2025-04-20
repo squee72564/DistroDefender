@@ -4,6 +4,7 @@
         "gtest",
         "fmt",
         "rapidjson",
-        "cpp-httplib"
+        "cpp-httplib",
+        "rocksdb"
     ]
 }
