@@ -140,11 +140,11 @@ public:
     std::optional<std::vector<JsonDOM>> getArray(std::string_view path) const;
 
     std::optional<std::vector<std::pair<std::string,JsonDOM>>>
-        getObject(std::string_view) const;
+        getObject(std::string_view = "") const;
 
     std::optional<std::vector<std::string>> getFields() const;
 
-    std::optional<JsonDOM> getJsonDOM(std::string_view path) const;
+    std::optional<JsonDOM> getJsonDOM(std::string_view path = "") const;
 
     std::string toStrPretty() const;
 
