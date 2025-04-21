@@ -82,6 +82,7 @@ endif(ENGINE_BUILD_TEST)
 find_and_create_imported_target("spdlog" "spdlog::spdlog")
 find_and_create_imported_target("fmt" "fmt::fmt-header-only")
 find_and_create_imported_target("httplib" "httplib::htttplib")
+find_and_create_imported_target("RocksDB" "RocksDB::rocksdb")
 
 ############################################
 # TARGETS
@@ -91,10 +92,12 @@ add_executable(main ${ENGINE_SOURCE_DIR}/main.cpp)
 
 add_subdirectory(${ENGINE_SOURCE_DIR}/base)
 add_subdirectory(${ENGINE_SOURCE_DIR}/httpserver)
+add_subdirectory(${ENGINE_SOURCE_DIR}/kvdb)
 
 target_link_libraries(main
     base
     httpserver
+    kvdb
 )
 
 # Build Benchmark
