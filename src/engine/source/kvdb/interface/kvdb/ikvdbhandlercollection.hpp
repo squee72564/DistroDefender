@@ -6,7 +6,7 @@
 namespace kvdbManager
 {
 
-class IKVDBHandlerConnection
+class IKVDBHandlerCollection
 {
 public:
     virtual void addKVDBHandler(const std::string& dbName, const std::string& scopeName) = 0;

@@ -30,7 +30,7 @@ public:
 
     virtual base::OptError createDB(const std::string& name, const std::string& path) = 0;
 
-    virtual base::OptError loadDBFromJson(const std::string& name, const json::Json content) = 0;
+    virtual base::OptError loadDBFromJson(const std::string& name, const json::Json& content) = 0;
 
     virtual bool existsDB(const std::string& name) = 0;
 
