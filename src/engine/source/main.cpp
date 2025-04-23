@@ -1,3 +1,5 @@
+#include <signal.h>
+
 #include <httpserver/server.hpp>
 #include <base/logger.hpp>
 #include <base/utils/singletonLocator.hpp>
@@ -8,11 +10,27 @@
 
 #include "StackExecutor.hpp"
 
+std::shared_ptr<httpserver::Server> g_engineServer{nullptr};
+
+cmd::details::StackExecutor g_exitHandler{};
+
+void sigintHandler(const int signum)
+{
+    if (g_engineServer)
+    {
+        g_engineServer.reset();
+    }
+}
+
+void sigtermHandler(const int signum)
+{
+    g_exitHandler.execute(); 
+}
+
 int main(int argc, char* argv[]) {
     
     // exit handler
 
-    cmd::details::StackExecutor exitHandler{};
 
     // Initialize Logger
     {
@@ -20,7 +38,7 @@ int main(int argc, char* argv[]) {
             cfg.level = logger::LogLevel::Debug;
             logger::start(cfg);
 
-            exitHandler.add( [](){ logger::stop(); } );
+            g_exitHandler.add( [](){ logger::stop(); } );
             LOG_INFO("Logging initialized.");
     }
 
@@ -35,10 +53,37 @@ int main(int argc, char* argv[]) {
     catch (const std::exception& e)
     {
         LOG_ERROR("Error loading configuration: {}", e.what());
-        exitHandler.execute();
+        g_exitHandler.execute();
         exit(EXIT_FAILURE);
     }
-    
+
+    // Set signal [SIGINT]: Ctrl+C handler
+    {
+        struct sigaction sigIntHandler = {};
+        sigIntHandler.sa_handler = sigintHandler;
+        sigemptyset(&sigIntHandler.sa_mask);
+        sigIntHandler.sa_flags = 0;
+        sigaction(SIGINT, &sigIntHandler, nullptr);
+    }
+
+    // Set signal [SIGINT]: SIGTERM (kill <pid>)
+    {
+        struct sigaction sigTermHandler = {};
+        sigTermHandler.sa_handler = sigtermHandler;
+        sigemptyset(&sigTermHandler.sa_mask);
+        sigTermHandler.sa_flags = 0;
+        sigaction(SIGTERM, &sigTermHandler, nullptr);
+    }
+
+    // Set signal [SIGINT]: Broken pipe handler
+    {
+        struct sigaction sigPipeHandler = {};
+        sigPipeHandler.sa_handler = SIG_IGN;
+        sigemptyset(&sigPipeHandler.sa_mask);
+        sigPipeHandler.sa_flags = 0;
+        sigaction(SIGPIPE, &sigPipeHandler, nullptr);
+    }
+
     try
     {
         // Set new log level if config us different than default
@@ -60,7 +105,6 @@ int main(int argc, char* argv[]) {
     }
 
     std::shared_ptr<httpserver::Server> apiServer{nullptr};
-    std::shared_ptr<httpserver::Server> engineServer{nullptr};
 
     std::shared_ptr<kvdbManager::KVDBManager> kvdbManager{nullptr};
 
@@ -75,7 +119,7 @@ int main(int argc, char* argv[]) {
 
         kvdbManager->initialize();
 
-        exitHandler.add(
+        g_exitHandler.add(
             [kvdbManager]()
             {
                 kvdbManager->finalize();
@@ -88,7 +132,7 @@ int main(int argc, char* argv[]) {
     catch (const std::exception& ex)
     {
         LOG_ERROR("Error Initializing KVDB:\n{}", ex.what());
-        exitHandler.execute();
+        g_exitHandler.execute();
         exit(EXIT_FAILURE);
     }
 
@@ -97,7 +141,7 @@ int main(int argc, char* argv[]) {
         {
             apiServer = std::make_shared<httpserver::Server>("API_SERVER");
 
-            exitHandler.add(
+            g_exitHandler.add(
                 [apiServer]()
                 {
                     apiServer->stop();
@@ -126,11 +170,11 @@ int main(int argc, char* argv[]) {
 
         // EVENT SERVER
         {
-            engineServer = std::make_shared<httpserver::Server>("EVENT_SERVER");
+            g_engineServer = std::make_shared<httpserver::Server>("EVENT_SERVER");
 
             auto testRoute = "/test/engine";
 
-            engineServer->addRoute(
+            g_engineServer->addRoute(
                 httpserver::Method::GET,
                 testRoute,
                 [testRoute](const auto& req, const auto& res)
@@ -150,13 +194,13 @@ int main(int argc, char* argv[]) {
     catch (const std::exception& e)
     {
         LOG_ERROR("An error occurred while initializing the modules: {}.", e.what());
-        exitHandler.execute();
+        g_exitHandler.execute();
         exit(EXIT_FAILURE);
     }
 
     try
     {
-        engineServer->start(
+        g_engineServer->start(
             confManager.get<std::string>(conf::key::SERVER_EVENT_SOCKET),
             false
         );
@@ -167,7 +211,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Clean exit
-    exitHandler.execute();
+    g_exitHandler.execute();
 
     return 0;
 }
