@@ -18,6 +18,8 @@ using RefInfo = std::map<std::string, uint32_t>;
 class IKVDBManager
 {
 public:
+    virtual ~IKVDBManager() = default;
+
     virtual void initialize() = 0;
 
     virtual void finalize() = 0;

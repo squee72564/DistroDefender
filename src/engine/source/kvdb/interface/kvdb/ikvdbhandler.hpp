@@ -16,6 +16,8 @@ namespace kvdbManager
 class IKVDBHandler
 {
 public:
+    virtual ~IKVDBHandler() = default;
+
     virtual base::OptError
     set(const std::string& key, const std::string& value) = 0;
 

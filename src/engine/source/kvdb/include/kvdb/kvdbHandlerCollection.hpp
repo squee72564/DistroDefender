@@ -39,7 +39,7 @@ private:
 class KVDBHandlerCollection : public IKVDBHandlerCollection
 {
 public:
-    virtual ~KVDBHandlerCollection() = default;
+    ~KVDBHandlerCollection() override = default;
 
     void addKVDBHandler(const std::string &dbName, const std::string& scopeName) override;
 

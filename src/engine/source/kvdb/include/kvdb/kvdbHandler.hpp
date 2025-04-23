@@ -27,7 +27,7 @@ public:
                 const std::string& dbName,
                 const std::string& scopeName);
 
-    virtual ~KVDBHandler();
+    ~KVDBHandler() override;
 
     base::OptError set(const std::string& key, const std::string& value) override;
 

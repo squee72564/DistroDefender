@@ -35,6 +35,7 @@ public:
     const KVDBManager& operator=(KVDBManager&&) = delete;
 
     KVDBManager(const KVDBManagerOptions& options);
+    ~KVDBManager() override = default;
 
     void initialize() override;
 
