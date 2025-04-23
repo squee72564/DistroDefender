@@ -5,6 +5,10 @@
         },
         "kvdb": {
             "path": "/var/lib/distro-defender/engine/kvdb"
+        },
+        "server": {
+            "api_socket": "/tmp/distro_defender_api.sock",
+            "event_socket": "/tmp/distro_defender_event.sock"
         }
     }
 }
