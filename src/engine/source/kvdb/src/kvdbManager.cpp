@@ -310,16 +310,20 @@ void KVDBManager::initializeOptions()
 void KVDBManager::initializeMainDB()
 {
     const auto dbStoragePath = managerOptions_.dbStoragePath.string();
+    const auto dbPath = dbStoragePath + "/" + managerOptions_.dbName;
 
-    std::filesystem::create_directories(dbStoragePath);
+    LOG_INFO("KVDB storage path: {}", dbStoragePath);
+
+    std::filesystem::create_directories(dbPath);
 
     const std::string dbNameFullPath{
         fmt::format(
-            "{}{}",
-            dbStoragePath,
-            managerOptions_.dbName
+            "{}",
+            dbPath
         )
     };
+
+    LOG_INFO("KVDB db name full path: {}", dbNameFullPath);
 
     std::vector<std::string> columnNames;
 
@@ -328,7 +332,7 @@ void KVDBManager::initializeMainDB()
 
     bool hasDefaultCF{false};
 
-    const auto listStatus = rocksdb::DB::ListColumnFamilies(rocksdb::DBOptions(), dbNameFullPath, &columnNames);
+    const auto listStatus = rocksdb::DB::ListColumnFamilies(rocksdb::DBOptions(), dbPath, &columnNames);
 
     if (listStatus.ok())
     {
