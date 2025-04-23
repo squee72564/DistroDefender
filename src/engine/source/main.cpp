@@ -6,13 +6,21 @@
 #include <conf/keys.hpp>
 #include <conf/conf.hpp>
 
+#include "StackExecutor.hpp"
+
 int main(int argc, char* argv[]) {
     
+    // exit handler
+
+    cmd::details::StackExecutor exitHandler{};
+
     // Initialize Logger
     {
             logger::LoggerConfig cfg;
             cfg.level = logger::LogLevel::Debug;
             logger::start(cfg);
+
+            exitHandler.add( [](){ logger::stop(); } );
             LOG_INFO("Logging initialized.");
     }
 
@@ -27,7 +35,28 @@ int main(int argc, char* argv[]) {
     catch (const std::exception& e)
     {
         LOG_ERROR("Error loading configuration: {}", e.what());
+        exitHandler.execute();
         exit(EXIT_FAILURE);
+    }
+    
+    try
+    {
+        // Set new log level if config us different than default
+        const auto level = logger::strToLevel(
+            confManager.get<std::string>(conf::key::LOG_LEVEL)
+        );
+
+        const auto currLevel = logger::getLevel();
+
+        if (level != currLevel)
+        {
+            logger::setLevel(level);
+            LOG_DEBUG("Changed log level to '{}'", logger::levelToStr(level));
+        }
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR("Error setting log level from config:\n{}", e.what());
     }
 
     std::shared_ptr<httpserver::Server> apiServer{nullptr};
@@ -46,11 +75,20 @@ int main(int argc, char* argv[]) {
 
         kvdbManager->initialize();
 
+        exitHandler.add(
+            [kvdbManager]()
+            {
+                kvdbManager->finalize();
+                LOG_INFO("KVDB Terminated.");
+            }
+        );
+
         LOG_INFO("KVDB initialized.");
     }
     catch (const std::exception& ex)
     {
-        LOG_ERROR(fmt::format("Error Initializing KVDB:\n{}", ex.what()));
+        LOG_ERROR("Error Initializing KVDB:\n{}", ex.what());
+        exitHandler.execute();
         exit(EXIT_FAILURE);
     }
 
@@ -58,6 +96,14 @@ int main(int argc, char* argv[]) {
         // API SERVER
         {
             apiServer = std::make_shared<httpserver::Server>("API_SERVER");
+
+            exitHandler.add(
+                [apiServer]()
+                {
+                    apiServer->stop();
+                    LOG_INFO("Api server shut down.");
+                }
+            );
             
             auto testRoute = "/test/api";
 
@@ -104,6 +150,7 @@ int main(int argc, char* argv[]) {
     catch (const std::exception& e)
     {
         LOG_ERROR("An error occurred while initializing the modules: {}.", e.what());
+        exitHandler.execute();
         exit(EXIT_FAILURE);
     }
 
@@ -118,6 +165,9 @@ int main(int argc, char* argv[]) {
     {
         LOG_ERROR("An error occurred while running the server: {}.", e.what());
     }
+
+    // Clean exit
+    exitHandler.execute();
 
     return 0;
 }
