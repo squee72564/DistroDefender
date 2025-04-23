@@ -75,7 +75,53 @@ enum class LogLevel
     Invalid
 };
 
+constexpr static auto levelToStr(LogLevel level)
+{
+    switch (level)
+    {
+        case LogLevel::Trace: return "trace";
+        case LogLevel::Debug: return "debug";
+        case LogLevel::Info: return "info";
+        case LogLevel::Warn: return "warning";
+        case LogLevel::Err: return "error";
+        case LogLevel::Critical: return "critical";
+        case LogLevel::Off: return "off";
+        default: return "invalid";
+    }
+}
 
+constexpr static auto strToLevel(std::string_view level)
+{
+    if (level == levelToStr(LogLevel::Trace))
+    {
+        return LogLevel::Trace;
+    }
+    if (level == levelToStr(LogLevel::Debug))
+    {
+        return LogLevel::Debug;
+    }
+    if (level == levelToStr(LogLevel::Info))
+    {
+        return LogLevel::Info;
+    }
+    if (level == levelToStr(LogLevel::Warn))
+    {
+        return LogLevel::Warn;
+    }
+    if (level == levelToStr(LogLevel::Err))
+    {
+        return LogLevel::Err;
+    }
+    if (level == levelToStr(LogLevel::Critical))
+    {
+        return LogLevel::Critical;
+    }
+    if (level == levelToStr(LogLevel::Off))
+    {
+        return LogLevel::Off;
+    }
+    throw std::invalid_argument(fmt::format("Invalid log level: '{}'", level));
+}
 /**
  * @brief Structure for logging configuration parameters
  */
