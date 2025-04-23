@@ -93,11 +93,13 @@ add_executable(main ${ENGINE_SOURCE_DIR}/main.cpp)
 add_subdirectory(${ENGINE_SOURCE_DIR}/base)
 add_subdirectory(${ENGINE_SOURCE_DIR}/httpserver)
 add_subdirectory(${ENGINE_SOURCE_DIR}/kvdb)
+add_subdirectory(${ENGINE_SOURCE_DIR}/conf)
 
 target_link_libraries(main
     base
     httpserver
     kvdb
+    conf
 )
 
 # Build Benchmark
