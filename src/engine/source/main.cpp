@@ -72,7 +72,9 @@ int main(int argc, char* argv[]) {
 
             LOG_DEBUG(fmt::format("API SERVER ENDPOINT {} REGISTERED", testRoute));
 
-            apiServer->start("/tmp/2.sock");
+            apiServer->start(
+                confManager.get<std::string>(conf::key::SERVER_API_SOCKET)
+            );
 
         }
 
@@ -91,7 +93,12 @@ int main(int argc, char* argv[]) {
                 }
             );
 
-            LOG_DEBUG(fmt::format("ENGINE SERVER ENDPOINT {} REGISTERED", testRoute));
+            LOG_DEBUG(
+                fmt::format(
+                    "ENGINE SERVER ENDPOINT {} REGISTERED",
+                    testRoute
+                )
+            );
         }
     }
     catch (const std::exception& e)
@@ -102,7 +109,10 @@ int main(int argc, char* argv[]) {
 
     try
     {
-        engineServer->start("/tmp/1.sock", false);
+        engineServer->start(
+            confManager.get<std::string>(conf::key::SERVER_EVENT_SOCKET),
+            false
+        );
     }
     catch (const std::exception& e)
     {
