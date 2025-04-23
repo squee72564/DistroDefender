@@ -1,0 +1,10 @@
+{
+    "engine": {
+        "logger": {
+            "level": "info"
+        },
+        "kvdb": {
+            "path": "/var/lib/distro-defender/engine/kvdb"
+        }
+    }
+}
