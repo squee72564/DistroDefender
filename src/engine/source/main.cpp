@@ -1,6 +1,10 @@
-#include <base/logger.hpp>
 #include <httpserver/server.hpp>
-
+#include <base/logger.hpp>
+#include <base/utils/singletonLocator.hpp>
+#include <base/utils/singletonLocatorStrategies.hpp>
+#include <kvdb/kvdbManager.hpp>
+#include <conf/keys.hpp>
+#include <conf/conf.hpp>
 
 int main(int argc, char* argv[]) {
     
@@ -12,8 +16,43 @@ int main(int argc, char* argv[]) {
             LOG_INFO("Logging initialized.");
     }
 
-    std::shared_ptr<httpserver::Server> apiServer;
-    std::shared_ptr<httpserver::Server> engineServer;
+    // Load configuration
+
+    auto confManager = conf::Conf(std::make_shared<conf::ConfLoader>());
+
+    try
+    {
+        confManager.load();
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR("Error loading configuration: {}", e.what());
+        exit(EXIT_FAILURE);
+    }
+
+    std::shared_ptr<httpserver::Server> apiServer{nullptr};
+    std::shared_ptr<httpserver::Server> engineServer{nullptr};
+
+    std::shared_ptr<kvdbManager::KVDBManager> kvdbManager{nullptr};
+
+    // KVDB
+    try {
+
+        kvdbManager::KVDBManagerOptions kvdbOptions{
+            confManager.get<std::string>(conf::key::KVDB_PATH), "kvdb"
+        };
+
+        kvdbManager = std::make_shared<kvdbManager::KVDBManager>(kvdbOptions);
+
+        kvdbManager->initialize();
+
+        LOG_INFO("KVDB initialized.");
+    }
+    catch (const std::exception& ex)
+    {
+        LOG_ERROR(fmt::format("Error Initializing KVDB:\n{}", ex.what()));
+        exit(EXIT_FAILURE);
+    }
 
     try {
         // API SERVER
