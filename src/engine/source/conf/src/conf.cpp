@@ -30,6 +30,10 @@ Conf::Conf(std::shared_ptr<IConfLoader> confLoader)
 
     // KVDB module
     addUnit<std::string>(key::KVDB_PATH, "DD_KVDB_PATH", "/var/lib/distrodefender-server/engine/kvdb/");
+
+    // Server module
+    addUnit<std::string>(key::SERVER_API_SOCKET, "DD_SERVER_API_SOCKET", "/tmp/distro_defender_api.sock");
+    addUnit<std::string>(key::SERVER_EVENT_SOCKET, "DD_SERVER_EVENT_SOCKET", "/tmp/distro_defender_event.sock");
 };
 
 void Conf::validate(const json::Json& config) const
@@ -103,6 +107,7 @@ void Conf::load()
     {
         throw std::logic_error("The configuration is already loaded.");
     }
+
     json::Json config = (*confLoader_)();
     validate(config);
     config_ = std::move(config);
