@@ -282,6 +282,7 @@ public:
 
     std::optional<base::Error> validate(const JsonDOM& schema) const;
 
+    std::optional<base::Error> checkDuplicateKeys() const;
 
     static std::string formatJsonPath(std::string_view dotPath, bool skipDot);
 

@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include "base/json.hpp"
 
 #include <rapidjson/prettywriter.h>
@@ -572,6 +574,29 @@ std::optional<base::Error> JsonDOM::validate(const JsonDOM& schema) const
     }
 
     return std::nullopt;
+}
+
+std::optional<base::Error> Json::checkDuplicateKeys() const {
+    struct Checker {
+        std::optional<base::Error> error;
+        void visit(const rapidjson::Value& v) {
+            if (!v.IsObject() || error) return;
+            std::unordered_set<std::string_view> seen;
+            for (auto it = v.MemberBegin(); it != v.MemberEnd(); ++it) {
+                auto key = std::string_view(it->name.GetString());
+                if (!seen.insert(key).second) {
+                    error = base::Error{
+                      fmt::format("Duplicate JSON key '{}'", key)
+                    };
+                    return;
+                }
+            }
+            for (auto it = v.MemberBegin(); it != v.MemberEnd(); ++it)
+                visit(it->value);
+        }
+    } checker;
+    checker.visit(document_);
+    return checker.error;
 }
 
 std::string JsonDOM::formatJsonPath(std::string_view dotPath, bool skipDot)
