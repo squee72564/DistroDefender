@@ -69,14 +69,14 @@ public:
         assertSize(parts_.size());
     }
 
-    Name(const std::string& fullName)
-        : parts_{base::utils::string::split(fullName, SEPARATOR_C)}
+    Name(std::string_view name)
+        : parts_{base::utils::string::split(name, SEPARATOR_C)}
     {
         assertSize(parts_.size());
     }
 
     Name(const char* fullName)
-        : Name{std::string(fullName)}
+        : Name{std::string_view{fullName}}
     {
     }
 
