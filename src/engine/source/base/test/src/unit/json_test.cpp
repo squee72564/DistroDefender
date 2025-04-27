@@ -47,7 +47,6 @@ const char* errStr = R"({
 
 TEST(JsonTest, CopyDeleted)
 {
-    ASSERT_FALSE(std::is_copy_constructible<json::Json>::value);
     ASSERT_FALSE(std::is_copy_assignable<json::Json>::value);
 }
 

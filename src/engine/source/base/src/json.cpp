@@ -28,6 +28,12 @@ JsonDOM::JsonDOM(const rapidjson::Value & value)
     document_.CopyFrom(value, document_.GetAllocator());
 }
 
+JsonDOM::JsonDOM(const JsonDOM& other)
+    : document_{}
+{
+    document_.CopyFrom(other.document_, document_.GetAllocator());
+}
+
 std::optional<base::Error> JsonDOM::getParseError() const
 {
     if (!document_.HasParseError()) { return std::nullopt; }

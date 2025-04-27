@@ -91,7 +91,7 @@ public:
 
     explicit JsonDOM(const rapidjson::Value & value);
 
-    JsonDOM(const JsonDOM& other) = delete;
+    JsonDOM(const JsonDOM& other);
 
     JsonDOM& operator=(const JsonDOM& other) = delete;
 
