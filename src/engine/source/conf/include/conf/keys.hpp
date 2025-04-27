@@ -12,7 +12,10 @@ constexpr std::string_view LOG_LEVEL = "/engine/logger/level";
 // KVDB
 constexpr std::string_view KVDB_PATH = "/engine/kvdb/path";
 
+// STORE
+constexpr std::string_view STORE_PATH = "/engine/store/path";
 
+// SERVER
 constexpr std::string_view SERVER_API_SOCKET = "/engine/server/api_socket";
 constexpr std::string_view SERVER_EVENT_SOCKET = "/engine/server/event_socket";
 } // namespace conf::key

@@ -29,11 +29,30 @@ Conf::Conf(std::shared_ptr<IConfLoader> confLoader)
     addUnit<std::string>(key::LOG_LEVEL, "DD_LOG_LEVEL", "info");
 
     // KVDB module
-    addUnit<std::string>(key::KVDB_PATH, "DD_KVDB_PATH", "/var/lib/distrodefender-server/engine/kvdb/");
+    addUnit<std::string>(
+        key::KVDB_PATH,
+        "DD_KVDB_PATH",
+        "/var/lib/distro_defender/engine/kvdb"
+    );
 
     // Server module
-    addUnit<std::string>(key::SERVER_API_SOCKET, "DD_SERVER_API_SOCKET", "/tmp/distro_defender_api.sock");
-    addUnit<std::string>(key::SERVER_EVENT_SOCKET, "DD_SERVER_EVENT_SOCKET", "/tmp/distro_defender_event.sock");
+    addUnit<std::string>(
+        key::SERVER_API_SOCKET,
+        "DD_SERVER_API_SOCKET",
+        "/tmp/distro_defender_api.sock"
+    );
+
+    addUnit<std::string>(
+        key::SERVER_EVENT_SOCKET,
+        "DD_SERVER_EVENT_SOCKET",
+        "/tmp/distro_defender_event.sock"
+    );
+
+    addUnit<std::string>(
+        key::STORE_PATH,
+        "DD_STORE_PATH",
+        "/var/lib/distro_defender/engine/store"
+    );
 };
 
 void Conf::validate(const json::Json& config) const
