@@ -7,6 +7,8 @@
 #include <kvdb/kvdbManager.hpp>
 #include <conf/keys.hpp>
 #include <conf/conf.hpp>
+#include <store/store.hpp>
+#include <store/drivers/fileDriver.hpp>
 
 #include "StackExecutor.hpp"
 
@@ -105,8 +107,8 @@ int main(int argc, char* argv[]) {
     }
 
     std::shared_ptr<httpserver::Server> apiServer{nullptr};
-
     std::shared_ptr<kvdbManager::KVDBManager> kvdbManager{nullptr};
+    std::shared_ptr<store::Store> store;
 
     // KVDB
     try {
@@ -132,6 +134,21 @@ int main(int argc, char* argv[]) {
     catch (const std::exception& ex)
     {
         LOG_ERROR("Error Initializing KVDB:\n{}", ex.what());
+        g_exitHandler.execute();
+        exit(EXIT_FAILURE);
+    }
+
+    // Store
+    try
+    {
+        auto fileStorage = confManager.get<std::string>(conf::key::STORE_PATH);
+        auto fileDriver = std::make_shared<store::drivers::FileDriver>(fileStorage);
+        store = std::make_shared<store::Store>(fileDriver);
+        LOG_INFO("Store Initialized");
+    }
+    catch (const std::exception& ex)
+    {
+        LOG_ERROR("Error Initializing Store:\n{}", ex.what());
         g_exitHandler.execute();
         exit(EXIT_FAILURE);
     }

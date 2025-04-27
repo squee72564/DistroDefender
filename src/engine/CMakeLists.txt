@@ -102,6 +102,7 @@ target_link_libraries(main
     kvdb
     conf
     store
+    store::fileDriver
 )
 
 # Build Benchmark
