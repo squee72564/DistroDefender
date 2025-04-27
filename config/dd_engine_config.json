@@ -4,11 +4,14 @@
             "level": "info"
         },
         "kvdb": {
-            "path": "/var/lib/distro-defender/engine/kvdb"
+            "path": "/var/lib/distro_defender/engine/kvdb"
         },
         "server": {
             "api_socket": "/tmp/distro_defender_api.sock",
             "event_socket": "/tmp/distro_defender_event.sock"
+        },
+        "store": {
+            "path": "/var/lib/distro_defender/engine/store"
         }
     }
 }
