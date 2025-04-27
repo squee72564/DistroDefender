@@ -94,12 +94,14 @@ add_subdirectory(${ENGINE_SOURCE_DIR}/base)
 add_subdirectory(${ENGINE_SOURCE_DIR}/httpserver)
 add_subdirectory(${ENGINE_SOURCE_DIR}/kvdb)
 add_subdirectory(${ENGINE_SOURCE_DIR}/conf)
+add_subdirectory(${ENGINE_SOURCE_DIR}/store)
 
 target_link_libraries(main
     base
     httpserver
     kvdb
     conf
+    store
 )
 
 # Build Benchmark
