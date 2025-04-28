@@ -7,6 +7,7 @@
 #include <string_view>
 #include <vector>
 #include <utility>
+#include <variant>
 
 #include <rapidjson/document.h>
 #include <rapidjson/Pointer.h>
@@ -57,8 +58,15 @@ struct is_rapidjson_trivially_settable : std::disjunction<
     std::is_same<std::decay_t<T>, bool>,
     std::is_same<std::decay_t<T>, const char*>,
     std::is_same<std::decay_t<T>, std::string_view>,
-    std::is_same<std::decay_t<T>, std::string>
+    std::is_same<std::decay_t<T>, std::string>,
+    std::is_enum<std::decay_t<T>>
 > {};
+
+// Helper for setTypeMany
+using JsonValue = std::variant<
+    bool, int, int64_t, unsigned, uint64_t, float, double,
+    std::string, std::string_view, const char*
+>;
 
 template <typename>
 struct dependent_false : std::false_type {};
@@ -184,7 +192,10 @@ public:
 
         rapidjson::Value v;
 
-        if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
+        if constexpr (std::is_enum_v<std::decay_t<T>>) {
+            v.SetInt(static_cast<std::underlying_type_t<std::decay_t<T>>>(value));
+        }
+        else if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
             v.SetBool(value);
         } else if constexpr (std::is_same_v<std::decay_t<T>, int>) {
             v.SetInt(value);
@@ -221,6 +232,25 @@ public:
         }
 
         path_ptr.Set(document_, v);
+    }
+    
+
+    void setTypeMany(std::initializer_list<std::pair<std::string_view, JsonValue>> items)
+    {
+        for (const auto& item : items)
+        {
+            const auto& path = item.first;
+            const auto& val = item.second;
+            std::visit(
+                [this, &path](auto&& v) {
+                    setType(
+                        path,
+                        std::forward<decltype(v)>(v)
+                    );
+                },
+                val
+            );
+        }
     }
 
     template <typename T>

@@ -566,6 +566,59 @@ TEST(JsonTest, setType)
 
 }
 
+TEST(JsonTest, setTypeMany)
+{
+    std::optional<base::Error> err{ base::Error{} };
+
+    json::Json json{};
+    err = json.getParseError();
+    ASSERT_FALSE(base::isError(err));
+    
+    const char* cstr = "cstring";
+
+    json.setTypeMany({
+        {"/i1", 1},
+        {"/i2", 2147483648LL},
+        {"/u1", static_cast<unsigned>(123456)},
+        {"/u2", static_cast<uint64_t>(1234567890123456789ULL)},
+        {"/f", false},
+        {"/float", 3.1416f},
+        {"/double", 3.1416},
+        {"/string", std::string("std::string")},
+        {"/string_view", std::string_view("std::string_view")},
+        {"/cstring", cstr},
+    });
+
+    ASSERT_TRUE(json.isType("/i1", json::Type::Int));
+    ASSERT_TRUE(json.isType("/i1", json::Type::Int64));
+    ASSERT_TRUE(json.isType("/i1", json::Type::Number));
+
+    ASSERT_TRUE(json.isType("/i2", json::Type::Int64));
+    ASSERT_FALSE(json.isType("/i2", json::Type::Int));
+    ASSERT_TRUE(json.isType("/i2", json::Type::Number));
+
+    ASSERT_TRUE(json.isType("/u1", json::Type::Uint));
+    ASSERT_TRUE(json.isType("/u1", json::Type::Uint64));
+    ASSERT_TRUE(json.isType("/u1", json::Type::Number));
+
+    ASSERT_TRUE(json.isType("/u2", json::Type::Uint64));
+    ASSERT_FALSE(json.isType("/u2", json::Type::Uint)); // Too large for uint32
+    ASSERT_TRUE(json.isType("/u2", json::Type::Number));
+
+    ASSERT_TRUE(json.isType("/f", json::Type::Boolean));
+
+    ASSERT_TRUE(json.isType("/float", json::Type::Float));
+    ASSERT_TRUE(json.isType("/float", json::Type::Double));
+    ASSERT_TRUE(json.isType("/float", json::Type::Number));
+
+    ASSERT_TRUE(json.isType("/double", json::Type::Double));
+    ASSERT_TRUE(json.isType("/double", json::Type::Number));
+
+    ASSERT_TRUE(json.isType("/string", json::Type::String));
+    ASSERT_TRUE(json.isType("/string_view", json::Type::String));
+    ASSERT_TRUE(json.isType("/cstring", json::Type::String));
+}
+
 TEST(JsonTest, erase)
 {
     std::optional<base::Error> err{ base::Error{} };
