@@ -95,6 +95,8 @@ add_subdirectory(${ENGINE_SOURCE_DIR}/httpserver)
 add_subdirectory(${ENGINE_SOURCE_DIR}/kvdb)
 add_subdirectory(${ENGINE_SOURCE_DIR}/conf)
 add_subdirectory(${ENGINE_SOURCE_DIR}/store)
+add_subdirectory(${ENGINE_SOURCE_DIR}/api)
+add_subdirectory(${ENGINE_SOURCE_DIR}/schemas)
 
 target_link_libraries(main
     base
@@ -103,6 +105,8 @@ target_link_libraries(main
     conf
     store
     store::fileDriver
+    api
+    schemas
 )
 
 # Build Benchmark
