@@ -49,7 +49,7 @@ inline httplib::Response internalErrorResponse(const std::string& message)
 {
     json::Json json{};
     json.setTypeMany({
-        {"/status", schema::ReturnStatus::ERROR},
+        {"/status", schemas::engine::ReturnStatus::ERROR},
         {"/error", message}
     });
 
@@ -60,7 +60,7 @@ inline httplib::Response internalErrorResponse(const std::string& message)
     return response;
 }
 
-httplib::Response userResponse(const json::Json& res)
+inline httplib::Response userResponse(const json::Json& res)
 {
     // Check json validity and maybe validate against a schema?
     // Use internalErrorResponse with the base::Error message
@@ -78,7 +78,7 @@ inline httplib::Response userErrorResponse(const std::string& message)
 {
     json::Json json{};
     json.setTypeMany({
-        {"/status", schema::ReturnStatus::ERROR},
+        {"/status", schemas::engine::ReturnStatus::ERROR},
         {"/error", message}
     });
 
@@ -89,7 +89,7 @@ inline httplib::Response userErrorResponse(const std::string& message)
     return response;
 }
 
-ResOrErrorResp<json::Json> parseRequest(const httplib::Request& req)
+inline ResOrErrorResp<json::Json> parseRequest(const httplib::Request& req)
 {
     if (req.body.empty()){
         return json::Json{};
