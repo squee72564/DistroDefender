@@ -51,7 +51,7 @@ TEST(ApiAdaptorTEst, InternalErrorResponse)
 
     jsonRes.setObject("");
     jsonRes.setTypeMany({
-        {"/status", schema::ReturnStatus::ERROR},
+        {"/status", schemas::engine::ReturnStatus::ERROR},
         {"/error", "test"}
     });
 
@@ -70,7 +70,7 @@ TEST(ApiAdapterTest, UserResponse)
     json::Json jsonRes{};
     jsonRes.setObject("");
     jsonRes.setType(
-        "/status", schema::ReturnStatus::OK
+        "/status", schemas::engine::ReturnStatus::OK
     );
 
     ASSERT_NO_THROW(res = userResponse(jsonRes));
@@ -91,7 +91,7 @@ TEST(ApiAdapterTest, UserErrorResponse)
     jsonRes.setObject("");
 
     jsonRes.setTypeMany({
-        {"/status", schema::ReturnStatus::ERROR},
+        {"/status", schemas::engine::ReturnStatus::ERROR},
         {"/error", "test"}
     });
 
@@ -154,7 +154,7 @@ TEST(ApiAdapterTest, ParseResponse)
 
     json::Json jsonRes;
     jsonRes.setObject("");
-    jsonRes.setType("/status", schema::ReturnStatus::OK);
+    jsonRes.setType("/status", schemas::engine::ReturnStatus::OK);
 
     ASSERT_NO_THROW(res = userResponse(jsonRes));
 
