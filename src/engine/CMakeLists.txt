@@ -97,6 +97,7 @@ add_subdirectory(${ENGINE_SOURCE_DIR}/conf)
 add_subdirectory(${ENGINE_SOURCE_DIR}/store)
 add_subdirectory(${ENGINE_SOURCE_DIR}/api)
 add_subdirectory(${ENGINE_SOURCE_DIR}/schemas)
+add_subdirectory(${ENGINE_SOURCE_DIR}/builder)
 
 target_link_libraries(main
     base
@@ -107,6 +108,7 @@ target_link_libraries(main
     store::fileDriver
     api
     schemas
+    
 )
 
 # Build Benchmark
