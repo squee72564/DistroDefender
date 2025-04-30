@@ -19,7 +19,7 @@ if (ENGINE_BUILD_TEST)
 
 set(TEST_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/test/src)
 set(UTEST_SRC_DIR ${TEST_SRC_DIR}/unit)
-set(TEST_INC_DIR ${TEST_SRC_DIR}/include)
+set(TEST_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/test/include)
 
 add_executable(api_adapter_utest
     ${UTEST_SRC_DIR}/adapter_test.cpp
@@ -37,5 +37,16 @@ target_link_libraries(api_adapter_utest
 )
 
 gtest_discover_tests(api_adapter_utest)
+
+add_library(api_adapter_test INTERFACE)
+target_include_directories(api_adapter_test INTERFACE ${TEST_INC_DIR})
+target_link_libraries(api_adapter_test
+    INTERFACE
+    api::adapter
+    GTest::gtest
+    base::test
+)
+
+add_library(api::adapter::test ALIAS api_adapter_test)
 
 endif(ENGINE_BUILD_TEST)
