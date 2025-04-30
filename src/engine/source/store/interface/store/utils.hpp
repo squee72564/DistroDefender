@@ -26,20 +26,18 @@ namespace utils
  *
  * @param contentJson The JSON content to wrap.
  * @param original The original data string.
- * @param format The format of original.
  * @return A JSON object containing the wrapped content and original data.
  */
 inline const json::Json
-jsonGenerator(const json::Json& contentJson, const std::string& original, const std::string& format)
+jsonGenerator(const json::Json& contentJson, const std::string& original)
 {
     // Wraps the content in both json and yml
     auto wrappedContent = json::Json {};
-    wrappedContent.setObject();
+    wrappedContent.setObject("");
 
     // Save the original json and yml
     wrappedContent.set("/json", contentJson);
-    wrappedContent.setString(original, "/original");
-    wrappedContent.setString(format, "/format");
+    wrappedContent.setType("/original", original);
 
     return wrappedContent;
 }
@@ -55,7 +53,7 @@ jsonGenerator(const json::Json& contentJson, const std::string& original, const 
  * @param original Flag to indicate whether to retrieve the original data.
  * @return A variant containing the retrieved JSON data or an error.
  */
-inline std::variant<json::Json, base::Error>
+inline base::RespOrError<json::Json>
 get(std::shared_ptr<const store::IStoreReader> storeRead, const base::Name& name, bool original = false)
 {
     std::variant<json::Json, base::Error> result;
@@ -64,7 +62,7 @@ get(std::shared_ptr<const store::IStoreReader> storeRead, const base::Name& name
     {
         return base::Error {fmt::format("Engine utils: '{}' could not be obtained from the "
                                         "store: {}.",
-                                        name.fullName(),
+                                        name.toStr(),
                                         std::get<base::Error>(jsonObject).message)};
     }
 
@@ -75,7 +73,7 @@ get(std::shared_ptr<const store::IStoreReader> storeRead, const base::Name& name
         return json;
     }
 
-    auto jsonValue = json.getJson("/json");
+    auto jsonValue = json.getJsonDOM("/json");
     if (!jsonValue.has_value())
     {
         return base::Error {"/json path not found in JSON."};
@@ -100,12 +98,11 @@ get(std::shared_ptr<const store::IStoreReader> storeRead, const base::Name& name
 inline std::optional<base::Error> add(std::shared_ptr<store::IStore> istore,
                                       const base::Name& name,
                                       const store::NamespaceId& namespaceId,
-                                      const std::string& format,
                                       const json::Json& contentJson,
                                       const std::string& original)
 {
     std::optional<base::Error> result = std::nullopt;
-    const auto wrappedContent = jsonGenerator(contentJson, original, format);
+    const auto wrappedContent = jsonGenerator(contentJson, original);
     result = istore->createDoc(name, namespaceId, wrappedContent);
 
     return result;
@@ -119,19 +116,17 @@ inline std::optional<base::Error> add(std::shared_ptr<store::IStore> istore,
  *
  * @param istore The store to update data in.
  * @param name The name of the data to update.
- * @param format The format of original.
  * @param contentJson The content JSON for the update.
  * @param original The original data string for the update.
  * @return An optional containing an error if the update fails.
  */
 inline std::optional<base::Error> update(std::shared_ptr<store::IStore> istore,
                                          const base::Name& name,
-                                         const std::string& format,
                                          const json::Json& contentJson,
                                          const std::string& original)
 {
     std::optional<base::Error> result = std::nullopt;
-    const auto wrappedContent = jsonGenerator(contentJson, original, format);
+    const auto wrappedContent = jsonGenerator(contentJson, original);
     istore->updateDoc(name, wrappedContent);
 
     return result;

@@ -16,12 +16,6 @@ public:
     NamespaceId() = default;
     ~NamespaceId() = default;
 
-    //NamespaceId(const std::string& id)
-    //    : id_{id}
-    //{
-    //    assertValid();
-    //}
-
     NamespaceId(const base::Name& id)
         : id_{id}
     {
