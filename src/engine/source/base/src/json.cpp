@@ -28,6 +28,25 @@ JsonDOM::JsonDOM(const rapidjson::Value & value)
     document_.CopyFrom(value, document_.GetAllocator());
 }
 
+JsonDOM::JsonDOM(std::initializer_list<std::pair<std::string_view, JsonValue>> items)
+    : document_{}
+{
+    for (const auto& item: items)
+    {
+        const auto& path = item.first;
+        const auto& val = item.second;
+        std::visit(
+            [this, &path](auto&& v) {
+                setType(
+                    path,
+                    std::forward<decltype(v)>(v)
+                );
+            },
+            val
+        );
+    }
+}
+
 JsonDOM::JsonDOM(const JsonDOM& other)
     : document_{}
 {
@@ -542,6 +561,59 @@ rapidjson::Value& JsonDOM::setAndGetArray(std::string_view path)
     return *path_ptr.Get(document_);
 }
 
+void JsonDOM::appendString(std::string_view path, std::string_view value)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    rapidjson::Value rapidValue{value.data(), document_.GetAllocator()};
+
+    auto* val = path_ptr.Get(document_);
+    if (val)
+    {
+        if (!val->IsArray())
+        {
+            val->SetArray();
+        }
+
+        val->PushBack(rapidValue, document_.GetAllocator());
+    }
+    else
+    {
+        rapidjson::Value vArray;
+        vArray.SetArray();
+        vArray.PushBack(rapidValue, document_.GetAllocator());
+        path_ptr.Set(document_, vArray);
+    }
+}
+
+void JsonDOM::appendJson(std::string_view path, const JsonDOM& value)
+{
+    const auto path_ptr = rapidjson::Pointer(path.data());
+
+    validatePointer(path_ptr, path);
+
+    rapidjson::Value rapidValue{value.document_, document_.GetAllocator()};
+
+    auto* val = path_ptr.Get(document_);
+    if (val)
+    {
+        if (!val->IsArray())
+        {
+            val->SetArray();
+        }
+
+        val->PushBack(rapidValue, document_.GetAllocator());
+    }
+    else
+    {
+        rapidjson::Value vArray;
+        vArray.SetArray();
+        vArray.PushBack(rapidValue, document_.GetAllocator());
+        path_ptr.Set(document_, vArray);
+    }
+}
 
 bool JsonDOM::erase(std::string_view path)
 {
@@ -565,16 +637,27 @@ std::optional<base::Error> JsonDOM::validate(const JsonDOM& schema) const
 
     if (!document_.Accept(validator))
     {
-        rapidjson::StringBuffer buffer;
-        validator.GetInvalidSchemaPointer().StringifyUriFragment(buffer);
-        rapidjson::StringBuffer buffer2;
-        validator.GetInvalidDocumentPointer().StringifyUriFragment(buffer2);
+        rapidjson::StringBuffer sb;
+
+        validator.GetInvalidSchemaPointer().StringifyUriFragment(sb);
+        std::string schema_path = sb.GetString();
+        sb.Clear();
+
+        std::string keyword = validator.GetInvalidSchemaKeyword();
+        sb.Clear();
+
+        validator.GetInvalidDocumentPointer().StringifyUriFragment(sb);
+        std::string document_path = sb.GetString();
 
         return base::Error {
             fmt::format(
-                "Invalid JSON schema: [{}], [{}]",
-                std::string{buffer.GetString()},
-                std::string{buffer2.GetString()}
+                "Schema validation failed: "
+                "Invalid schema Keyword: '{}'. "
+                "Schema path: '{}', "
+                "Document path: '{}'\n",
+                keyword,
+                schema_path,
+                document_path
             )
         };
     }

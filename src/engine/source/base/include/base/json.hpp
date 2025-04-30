@@ -99,6 +99,8 @@ public:
 
     explicit JsonDOM(const rapidjson::Value & value);
 
+    explicit JsonDOM(std::initializer_list<std::pair<std::string_view, JsonValue>> items);
+
     JsonDOM(const JsonDOM& other);
 
     JsonDOM& operator=(const JsonDOM& other) = delete;
@@ -307,6 +309,10 @@ public:
 
         return *path_ptr.Get(document_);
     }
+
+    void appendString(std::string_view path, std::string_view value);
+
+    void appendJson(std::string_view path, const JsonDOM& value);
 
     bool erase(std::string_view path);
 
