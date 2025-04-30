@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-namespace schema
+namespace schemas::engine
 {
 
 enum ReturnStatus
@@ -43,6 +43,6 @@ constexpr std::string_view GENERIC_REQUEST_SCHEMA = R"({
     "required": []
 })";
 
-} // namespace schema
+} // namespace schemas::engine
 
 #endif // _SCHEMA_ENGINE_HPP
