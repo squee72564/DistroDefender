@@ -163,7 +163,7 @@ template <>
 struct fmt::formatter<base::Name> : formatter<std::string>
 {
     template <typename FormatCtx>
-    auto format(const base::Name& name, FormatCtx& ctx)
+    auto format(const base::Name& name, FormatCtx& ctx) const
     {
         return formatter<std::string>::format(name.toStr(), ctx);
     }
