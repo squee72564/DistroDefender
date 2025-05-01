@@ -55,7 +55,7 @@ inline httplib::Response internalErrorResponse(const std::string& message)
 
     httplib::Response response;
     response.status = httplib::StatusCode::InternalServerError_500;
-    response.set_content(json.toStr(), "plain/text");
+    response.set_content(json.toStrPretty(), "application/json");
 
     return response;
 }
@@ -68,7 +68,7 @@ inline httplib::Response userResponse(const json::Json& res)
 
     httplib::Response response;
     response.status = httplib::StatusCode::OK_200;
-    response.set_content(res.toStr(), "plain/text");
+    response.set_content(res.toStrPretty(), "application/json");
     return response;
 }
 
@@ -84,7 +84,7 @@ inline httplib::Response userErrorResponse(const std::string& message)
 
     httplib::Response response;
     response.status = httplib::StatusCode::BadRequest_400;
-    response.set_content(json.toStr(), "plain/text");
+    response.set_content(json.toStrPretty(), "application/json");
 
     return response;
 }
