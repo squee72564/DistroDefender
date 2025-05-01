@@ -16,11 +16,18 @@ JsonDOM::JsonDOM(rapidjson::Document&& document)
 
 }
 
+JsonDOM::JsonDOM(std::string_view json)
+    : document_{}
+{
+    document_.Parse(json.data());
+}
+
 JsonDOM::JsonDOM(const char* json)
     : document_{}
 {
     document_.Parse(json);
 }
+
 
 JsonDOM::JsonDOM(const rapidjson::Value & value)
     : document_{}

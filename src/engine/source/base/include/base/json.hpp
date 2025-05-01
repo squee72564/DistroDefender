@@ -95,6 +95,8 @@ public:
 
     explicit JsonDOM(rapidjson::Document&& document);
 
+    JsonDOM(std::string_view json);
+
     explicit JsonDOM(const char* json);
 
     explicit JsonDOM(const rapidjson::Value & value);
