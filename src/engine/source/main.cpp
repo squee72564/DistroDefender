@@ -10,6 +10,9 @@
 #include <store/store.hpp>
 #include <store/drivers/fileDriver.hpp>
 
+#include <api/handlers.hpp>
+#include <api/catalog/catalog.hpp>
+
 #include "StackExecutor.hpp"
 
 std::shared_ptr<httpserver::Server> g_engineServer{nullptr};
@@ -109,6 +112,7 @@ int main(int argc, char* argv[]) {
     std::shared_ptr<httpserver::Server> apiServer{nullptr};
     std::shared_ptr<kvdbManager::KVDBManager> kvdbManager{nullptr};
     std::shared_ptr<store::Store> store;
+    std::shared_ptr<api::catalog::Catalog> catalog;
 
     // KVDB
     try {
@@ -153,6 +157,15 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Catalog
+    {
+        api::catalog::Config catalogConfig {store};
+
+        catalog = std::make_shared<api::catalog::Catalog>(catalogConfig);
+
+        LOG_INFO("Catalog Initialized.");
+    }
+
     try {
         // API SERVER
         {
@@ -165,6 +178,10 @@ int main(int argc, char* argv[]) {
                     LOG_INFO("Api server shut down.");
                 }
             );
+
+            // Catalog
+            api::catalog::handlers::registerHandlers(catalog, apiServer);
+            LOG_DEBUG("Catalog API registered.");
             
             auto testRoute = "/test/api";
 
