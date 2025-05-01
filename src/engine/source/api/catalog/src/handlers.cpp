@@ -417,4 +417,15 @@ adapter::RouteHandler getNamespaces(const std::shared_ptr<ICatalog>& catalog)
     };
 }
 
+void registerHandlers(const std::shared_ptr<ICatalog>& catalog,
+                             const std::shared_ptr<httpserver::Server>& server)
+{
+    server->addRoute(httpserver::Method::POST, "/catalog/resource/post", resourcePost(catalog));
+    server->addRoute(httpserver::Method::GET, "/catalog/resource/get", resourceGet(catalog));
+    server->addRoute(httpserver::Method::DELETE, "/catalog/resource/delete", resourceDelete(catalog));
+    server->addRoute(httpserver::Method::PUT, "/catalog/resource/put", resourcePut(catalog));
+    server->addRoute(httpserver::Method::POST, "/catalog/resource/validate", resourceValidate(catalog));
+    server->addRoute(httpserver::Method::GET, "/catalog/namespaces/get", getNamespaces(catalog));
+
+}
 } // namespace api::catalog::handlers
