@@ -42,7 +42,7 @@ if(ENGINE_BUILD_TEST)
 
     add_executable(api_catalog_utest
         ${UNIT_SRC_DIR}/resource_test.cpp
-    #    ${UNIT_SRC_DIR}/catalog_test.cpp
+        ${UNIT_SRC_DIR}/catalog_test.cpp
         ${UNIT_SRC_DIR}/handlers_test.cpp
     )
     target_include_directories(api_catalog_utest
@@ -54,7 +54,7 @@ if(ENGINE_BUILD_TEST)
         api::catalog
         api::catalog::mocks
         GTest::gtest_main
-    #    builder::mocks
+        builder::mocks
         store::mocks
         api::adapter::test
     )
