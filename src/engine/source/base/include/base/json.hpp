@@ -14,12 +14,14 @@
 #include <rapidjson/error/en.h>
 
 #include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <base/error.hpp>
 
 
 namespace json
 {
+class JsonDOM;
 
 namespace
 {
@@ -59,13 +61,14 @@ struct is_rapidjson_trivially_settable : std::disjunction<
     std::is_same<std::decay_t<T>, const char*>,
     std::is_same<std::decay_t<T>, std::string_view>,
     std::is_same<std::decay_t<T>, std::string>,
-    std::is_enum<std::decay_t<T>>
+    std::is_enum<std::decay_t<T>>,
+    std::is_same<std::decay_t<T>, JsonDOM>
 > {};
 
 // Helper for setTypeMany
 using JsonValue = std::variant<
     bool, int, int64_t, unsigned, uint64_t, float, double,
-    std::string, std::string_view, const char*
+    std::string, std::string_view, const char*, JsonDOM
 >;
 
 template <typename>
@@ -231,11 +234,13 @@ public:
                 static_cast<rapidjson::SizeType>(value.size()),
                 document_.GetAllocator()
             );
+        } else if constexpr (std::is_same_v<std::decay_t<T>, JsonDOM>) {
+            v.CopyFrom(value.document_, document_.GetAllocator());
         } else {
             static_assert(dependent_false<T>::value, "Unhandled type in setType");
         }
 
-        path_ptr.Set(document_, v);
+        path_ptr.Set(document_, v, document_.GetAllocator());
     }
     
 
@@ -249,7 +254,7 @@ public:
                 [this, &path](auto&& v) {
                     setType(
                         path,
-                        std::forward<decltype(v)>(v)
+                        std::move(v)
                     );
                 },
                 val
@@ -260,56 +265,8 @@ public:
     template <typename T>
     rapidjson::Value& setAndGetType(std::string_view path, T&& value)
     {
-        static_assert(
-            is_rapidjson_trivially_settable<T>::value,
-            "type T must be trivially settable into a rapidjson::Value object"
-        );
-
-        const auto path_ptr = rapidjson::Pointer(path.data());
-
-        validatePointer(path_ptr, path);
-
-        rapidjson::Value v;
-
-        if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
-            v.SetBool(value);
-        } else if constexpr (std::is_same_v<std::decay_t<T>, int>) {
-            v.SetInt(value);
-        } else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>) {
-            v.SetInt64(value);
-        } else if constexpr (std::is_same_v<std::decay_t<T>, unsigned>) {
-            v.SetUint(value);
-        } else if constexpr (std::is_same_v<std::decay_t<T>, uint64_t>) {
-            v.SetUint64(value);
-        } else if constexpr (std::is_same_v<std::decay_t<T>, float>) {
-            v.SetFloat(value);
-        } else if constexpr (std::is_same_v<std::decay_t<T>, double>) {
-            v.SetDouble(value);
-        } else if constexpr (std::is_same_v<std::decay_t<T>, const char*>) {
-            v.SetString(
-                value,
-                static_cast<rapidjson::SizeType>(std::strlen(value)),
-                document_.GetAllocator()
-            );
-        } else if constexpr (std::is_same_v<std::decay_t<T>, std::string_view>) {
-            v.SetString(
-                value.data(),
-                static_cast<rapidjson::SizeType>(value.size()),
-                document_.GetAllocator()
-            );
-        } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
-            v.SetString(
-                value.c_str(),
-                static_cast<rapidjson::SizeType>(value.size()),
-                document_.GetAllocator()
-            );
-        } else {
-            static_assert(dependent_false<T>::value, "Unhandled type in setType");
-        }
-
-        path_ptr.Set(document_, v);
-
-        return *path_ptr.Get(document_);
+        setType(path, std::forward<T>(value));
+        return *rapidjson::Pointer(path.data()).Get(document_);
     }
 
     void appendString(std::string_view path, std::string_view value);
@@ -332,6 +289,17 @@ private:
 
 using Json = JsonDOM;
 
+
 } // namespace json
+
+template <>
+struct fmt::formatter<json::JsonDOM> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const json::JsonDOM& dom, FormatContext& ctx) const {
+        return format_to(ctx.out(), "{}", dom.toStrPretty());
+    }
+};
 
 #endif // _JSON_HPP

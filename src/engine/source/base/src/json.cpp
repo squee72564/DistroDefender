@@ -38,20 +38,7 @@ JsonDOM::JsonDOM(const rapidjson::Value & value)
 JsonDOM::JsonDOM(std::initializer_list<std::pair<std::string_view, JsonValue>> items)
     : document_{}
 {
-    for (const auto& item: items)
-    {
-        const auto& path = item.first;
-        const auto& val = item.second;
-        std::visit(
-            [this, &path](auto&& v) {
-                setType(
-                    path,
-                    std::forward<decltype(v)>(v)
-                );
-            },
-            val
-        );
-    }
+    setTypeMany(items);
 }
 
 JsonDOM::JsonDOM(const JsonDOM& other)
@@ -116,7 +103,11 @@ void JsonDOM::set(std::string_view ptrPath, const JsonDOM& value)
 
     validatePointer(field_ptr, ptrPath);
 
-    field_ptr.Set(document_, value.document_);
+    rapidjson::Value copy;
+
+    copy.CopyFrom(value.document_, document_.GetAllocator());
+
+    field_ptr.Set(document_, copy, document_.GetAllocator());
 }
 
 void JsonDOM::set(std::string_view basePtrPath, std::string_view referencePtrPath)
