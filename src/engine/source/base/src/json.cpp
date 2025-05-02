@@ -122,11 +122,11 @@ void JsonDOM::set(std::string_view basePtrPath, std::string_view referencePtrPat
 
     if (reference)
     {
-        base_ptr.Set(document_, *reference);
+        base_ptr.Set(document_, *reference, document_.GetAllocator());
     }
     else
     {
-        base_ptr.Set(document_, rapidjson::Value());
+        base_ptr.Set(document_, rapidjson::Value(), document_.GetAllocator());
     }
 }
 
@@ -495,7 +495,7 @@ void JsonDOM::setNull(std::string_view path)
 
     validatePointer(path_ptr, path);
 
-    path_ptr.Set(document_, rapidjson::Value().SetNull());
+    path_ptr.Set(document_, rapidjson::Value().SetNull(), document_.GetAllocator());
 }
 
 void JsonDOM::setEmpty(std::string_view path)
@@ -504,7 +504,7 @@ void JsonDOM::setEmpty(std::string_view path)
 
     validatePointer(path_ptr, path);
 
-    path_ptr.Set(document_, rapidjson::Value());
+    path_ptr.Set(document_, rapidjson::Value(), document_.GetAllocator());
 }
 
 void JsonDOM::setObject(std::string_view path)
@@ -513,9 +513,7 @@ void JsonDOM::setObject(std::string_view path)
 
     validatePointer(path_ptr, path);
 
-    auto& allocator = document_.GetAllocator();
-
-    path_ptr.Set(document_, rapidjson::Value().SetObject(), allocator);
+    path_ptr.Set(document_, rapidjson::Value().SetObject(), document_.GetAllocator());
 }
 
 rapidjson::Value& JsonDOM::setAndGetObject(std::string_view path)
@@ -565,7 +563,8 @@ void JsonDOM::appendString(std::string_view path, std::string_view value)
 
     validatePointer(path_ptr, path);
 
-    rapidjson::Value rapidValue{value.data(), document_.GetAllocator()};
+    rapidjson::Value rapidValue{};
+    rapidValue.SetString(value.data(), static_cast<rapidjson::SizeType>(value.size()), document_.GetAllocator());
 
     auto* val = path_ptr.Get(document_);
     if (val)
@@ -582,7 +581,7 @@ void JsonDOM::appendString(std::string_view path, std::string_view value)
         rapidjson::Value vArray;
         vArray.SetArray();
         vArray.PushBack(rapidValue, document_.GetAllocator());
-        path_ptr.Set(document_, vArray);
+        path_ptr.Set(document_, vArray, document_.GetAllocator());
     }
 }
 
@@ -592,7 +591,8 @@ void JsonDOM::appendJson(std::string_view path, const JsonDOM& value)
 
     validatePointer(path_ptr, path);
 
-    rapidjson::Value rapidValue{value.document_, document_.GetAllocator()};
+    rapidjson::Value rapidValue;
+    rapidValue.CopyFrom(value.document_, document_.GetAllocator());
 
     auto* val = path_ptr.Get(document_);
     if (val)
@@ -609,7 +609,7 @@ void JsonDOM::appendJson(std::string_view path, const JsonDOM& value)
         rapidjson::Value vArray;
         vArray.SetArray();
         vArray.PushBack(rapidValue, document_.GetAllocator());
-        path_ptr.Set(document_, vArray);
+        path_ptr.Set(document_, vArray, document_.GetAllocator());
     }
 }
 
