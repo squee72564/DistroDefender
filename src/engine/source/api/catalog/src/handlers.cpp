@@ -1,4 +1,7 @@
 #include <api/catalog/handlers.hpp>
+#include <schemas/catalog.hpp>
+
+#include <memory>
 
 namespace api::catalog::handlers
 {

@@ -4,10 +4,6 @@
 #include <api/adapter/adapter.hpp>
 #include <api/catalog/icatalog.hpp>
 
-#include <schemas/catalog.hpp>
-
-#include <memory>
-
 namespace api::catalog::handlers
 {
 
