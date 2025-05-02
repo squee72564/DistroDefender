@@ -1,5 +1,6 @@
 add_subdirectory(adapter)
 add_subdirectory(catalog)
+add_subdirectory(kvdb)
 
 add_library(api INTERFACE)
 
@@ -9,4 +10,5 @@ target_include_directories(api INTERFACE
 
 target_link_libraries(api INTERFACE
     api::catalog
+    api::kvdb
 )
