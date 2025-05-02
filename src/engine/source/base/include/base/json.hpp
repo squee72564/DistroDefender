@@ -91,6 +91,7 @@ enum Type {
     Double,
     Unknown
 };
+
 class JsonDOM
 {
 public:
@@ -159,7 +160,7 @@ public:
 
     std::optional<std::vector<std::string>> getFields() const;
 
-    std::optional<JsonDOM> getJsonDOM(std::string_view path = "") const;
+    std::optional<JsonDOM> getJson(std::string_view path = "") const;
 
     std::string toStrPretty() const;
 

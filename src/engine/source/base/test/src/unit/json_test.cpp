@@ -393,7 +393,7 @@ TEST(JsonTest, collectFields)
     }
 }
 
-TEST(JsonTest, getJsonDOM)
+TEST(JsonTest, getJson)
 {
     std::optional<base::Error> err{ base::Error{} };
 
@@ -401,7 +401,7 @@ TEST(JsonTest, getJsonDOM)
     err = json.getParseError();
     ASSERT_FALSE(base::isError(err));
 
-    std::optional<json::Json> val = json.getJsonDOM("");
+    std::optional<json::Json> val = json.getJson("");
 
     ASSERT_TRUE(val.has_value());
 

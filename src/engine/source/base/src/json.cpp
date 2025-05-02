@@ -338,7 +338,7 @@ std::optional<std::vector<std::string>> JsonDOM::getFields() const
     return result;
 }
 
-std::optional<JsonDOM> JsonDOM::getJsonDOM(std::string_view path) const
+std::optional<JsonDOM> JsonDOM::getJson(std::string_view path) const
 {
     const auto path_ptr = rapidjson::Pointer(path.data());
 

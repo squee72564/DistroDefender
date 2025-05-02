@@ -412,7 +412,7 @@ base::RespOrError<std::string> Catalog::getResource(const Resource& resource, co
 
     auto doc = base::getResponse<store::Doc>(docResult);
 
-    return doc.getJsonDOM("/json")->toStr();
+    return doc.getJson("/json")->toStr();
 }
 
 base::OptError Catalog::delDoc(const Resource& resource)

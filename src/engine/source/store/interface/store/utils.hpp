@@ -73,7 +73,7 @@ get(std::shared_ptr<const store::IStoreReader> storeRead, const base::Name& name
         return json;
     }
 
-    auto jsonValue = json.getJsonDOM("/json");
+    auto jsonValue = json.getJson("/json");
     if (!jsonValue.has_value())
     {
         return base::Error {"/json path not found in JSON."};
