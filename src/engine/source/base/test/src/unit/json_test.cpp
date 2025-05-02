@@ -342,7 +342,7 @@ TEST(JsonTest, getObject)
     ASSERT_TRUE(json.isType("/o", json::Type::Object));
     
     std::optional<
-        std::vector<std::pair<std::string,json::Json>>
+        std::vector<std::pair<std::string, json::Json>>
     > val = json.getObject("/o");
 
     ASSERT_TRUE(val.has_value());
@@ -494,6 +494,17 @@ TEST(JsonTest, setArray)
     json.setArray("/a");
     
     ASSERT_TRUE(json.isType("/a", json::Type::Array));
+
+    json.appendString("/a", "testing1");
+    json.appendString("/a", "testing2");
+
+    std::vector<json::Json> v{};
+    
+    ASSERT_NO_THROW(v = json.getArray("/a").value());
+
+    ASSERT_EQ(v[0].getString("").value(), "testing1"); 
+    ASSERT_EQ(v[1].getString("").value(), "testing2"); 
+
 }
 
 TEST(JsonTest, setAndGetArray)
