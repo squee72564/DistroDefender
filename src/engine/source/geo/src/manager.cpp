@@ -281,6 +281,13 @@ base::OptError Manager::addDb(std::string_view path, Type type)
     return addDbUnsafe(path, type, true);
 }
 
+base::OptError Manager::removeDb(std::string_view path)
+{
+    std::unique_lock<std::shared_mutex> lock(rwMapMutex_);
+    
+    return removeDbUnsafe(path);
+}
+
 base::OptError
 Manager::remoteUpsertDb(std::string_view path, Type type, std::string_view dbUrl, std::string_view hashUrl)
 {
