@@ -5,6 +5,9 @@
         "fmt",
         "rapidjson",
         "cpp-httplib",
-        "rocksdb"
+        "rocksdb",
+        "libmaxminddb",
+        "cpr",
+        "openssl"
     ]
 }

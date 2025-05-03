@@ -79,10 +79,16 @@ if(ENGINE_BUILD_TEST)
     include(GoogleTest)
 endif(ENGINE_BUILD_TEST)
 
+find_and_create_imported_target("RapidJSON" "RapidJSON::RapidJSON")
 find_and_create_imported_target("spdlog" "spdlog::spdlog")
 find_and_create_imported_target("fmt" "fmt::fmt-header-only")
-find_and_create_imported_target("httplib" "httplib::htttplib")
+find_and_create_imported_target("httplib" "httplib::httplib")
 find_and_create_imported_target("RocksDB" "RocksDB::rocksdb")
+find_and_create_imported_target("maxminddb" "maxminddb::maxminddb")
+find_and_create_imported_target("cpr" "cpr::cpr")
+
+find_and_create_imported_target("OpenSSL" "OpenSSL::SSL")
+find_and_create_imported_target("OpenSSL" "OpenSSL::Crypto")
 
 ############################################
 # TARGETS
@@ -97,6 +103,8 @@ add_subdirectory(${ENGINE_SOURCE_DIR}/conf)
 add_subdirectory(${ENGINE_SOURCE_DIR}/store)
 add_subdirectory(${ENGINE_SOURCE_DIR}/api)
 add_subdirectory(${ENGINE_SOURCE_DIR}/schemas)
+add_subdirectory(${ENGINE_SOURCE_DIR}/geo)
+
 add_subdirectory(${ENGINE_SOURCE_DIR}/builder)
 
 target_link_libraries(main
@@ -108,7 +116,7 @@ target_link_libraries(main
     store::fileDriver
     api
     schemas
-    
+    geo
 )
 
 # Build Benchmark
