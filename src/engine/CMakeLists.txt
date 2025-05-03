@@ -87,8 +87,8 @@ find_and_create_imported_target("RocksDB" "RocksDB::rocksdb")
 find_and_create_imported_target("maxminddb" "maxminddb::maxminddb")
 find_and_create_imported_target("cpr" "cpr::cpr")
 
-find_and_create_imported_target("OpenSSL" "OpenSSL::SSL")
-find_and_create_imported_target("OpenSSL" "OpenSSL::Crypto")
+find_and_create_imported_target_ex("OpenSSL" "OpenSSL::SSL")
+find_and_create_imported_target_ex("OpenSSL" "OpenSSL::Crypto")
 
 ############################################
 # TARGETS
