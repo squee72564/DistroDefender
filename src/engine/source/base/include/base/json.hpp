@@ -51,6 +51,8 @@ static inline void validatePointer(const rapidjson::Pointer& ptr, std::string_vi
 
 template <typename T>
 struct is_rapidjson_trivially_settable : std::disjunction<
+    std::is_same<std::decay_t<T>, short>,
+    std::is_same<std::decay_t<T>, unsigned short>,
     std::is_same<std::decay_t<T>, int>,
     std::is_same<std::decay_t<T>, unsigned>,
     std::is_same<std::decay_t<T>, int64_t>,
@@ -67,7 +69,7 @@ struct is_rapidjson_trivially_settable : std::disjunction<
 
 // Helper for setTypeMany
 using JsonValue = std::variant<
-    bool, int, int64_t, unsigned, uint64_t, float, double,
+    bool, short, unsigned short, int, int64_t, unsigned, uint64_t, float, double,
     std::string, std::string_view, const char*, JsonDOM
 >;
 
@@ -205,6 +207,10 @@ public:
         }
         else if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
             v.SetBool(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, short>) {
+            v.SetInt(value);
+        } else if constexpr (std::is_same_v<std::decay_t<T>, unsigned short>) {
+            v.SetUint(value);
         } else if constexpr (std::is_same_v<std::decay_t<T>, int>) {
             v.SetInt(value);
         } else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>) {
