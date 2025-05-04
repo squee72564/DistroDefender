@@ -84,6 +84,9 @@ public:
     Manager() = delete;
     Manager(const std::shared_ptr<store::IStoreInternal>& store, const std::shared_ptr<IDownloader>& downloader);
 
+    Manager(const Manager&) = delete;
+    Manager& operator=(const Manager&) = delete;
+
     /**
      * @copydoc IManager::listDbs
      */

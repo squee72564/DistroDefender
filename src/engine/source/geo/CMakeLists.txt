@@ -47,3 +47,64 @@ target_link_libraries(geo
     PRIVATE
     ${PRIVATE_LINKS}
 )
+
+if(ENGINE_BUILD_TEST)
+
+set(TEST_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/test/src)
+set(TEST_MOCK_DIR ${CMAKE_CURRENT_LIST_DIR}/test/mocks)
+set(UNIT_SRC_DIR ${TEST_SRC_DIR}/unit)
+set(COMPONENT_SRC_DIR ${TEST_SRC_DIR}/component)
+set(MMDB_PATH_TEST ${TEST_SRC_DIR}/testdb.mmdb)
+
+add_library(geo_mocks INTERFACE)
+target_include_directories(geo_mocks INTERFACE ${TEST_MOCK_DIR})
+target_link_libraries(geo_mocks INTERFACE geo::igeo GTest::gmock)
+add_library(geo::mocks ALIAS geo_mocks)
+
+add_executable(geo_utest
+    ${SRCS}
+    ${UNIT_SRC_DIR}/manager_test.cpp
+    ${UNIT_SRC_DIR}/locator_test.cpp
+)
+
+target_include_directories(geo_utest
+    PRIVATE
+    ${TEST_SRC_DIR}
+    ${SRC_DIR}
+    ${INC_DIR}/geo
+)
+
+target_link_libraries(geo_utest
+    PRIVATE
+    geo
+    geo::mocks # Ensure it compiles
+    ${PRIVATE_LINKS}
+    ${PUBLIC_LINKS}
+    GTest::gtest_main
+    store::mocks
+    OpenSSL::Crypto
+)
+
+gtest_discover_tests(geo_utest)
+target_compile_definitions(geo_utest PRIVATE MMDB_PATH_TEST="${MMDB_PATH_TEST}")
+
+add_executable(geo_ctest
+    ${COMPONENT_SRC_DIR}/manager_test.cpp
+)
+
+target_compile_options(geo_ctest PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+target_link_options(geo_ctest PRIVATE -fsanitize=address)
+
+target_link_libraries(geo_ctest
+    PRIVATE
+    geo
+    GTest::gtest_main
+    store::mocks
+    OpenSSL::Crypto
+)
+
+target_compile_definitions(geo_ctest PRIVATE MMDB_PATH_TEST="${MMDB_PATH_TEST}")
+
+gtest_discover_tests(geo_ctest)
+
+endif(ENGINE_BUILD_TEST)

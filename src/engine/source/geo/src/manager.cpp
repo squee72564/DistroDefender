@@ -17,7 +17,10 @@ namespace geo
 {
 
 Manager::Manager(const std::shared_ptr<store::IStoreInternal>& store, const std::shared_ptr<IDownloader>& downloader)
-    : store_{store}
+    : dbs_{}
+    , dbTypes_{}
+    , rwMapMutex_{}
+    , store_{store}
     , downloader_{downloader}
 {
     if (store_ == nullptr)
@@ -57,8 +60,43 @@ Manager::Manager(const std::shared_ptr<store::IStoreInternal>& store, const std:
         }
 
         auto doc = base::getResponse(dbResp);
-        auto path = doc.getString(PATH_PATH).value();
-        auto type = typeFromName(doc.getString(TYPE_PATH).value());
+
+        std::string path{};
+        std::string typeStr{};
+
+        try
+        {
+            path = doc.getString(PATH_PATH).value();
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error(
+                fmt::format(
+                    "Could not get path from document at '{}': {}\nDocument: {}",
+                    PATH_PATH,
+                    e.what(),
+                    doc.toStrPretty()
+                )
+            );
+        }
+
+        try
+        {
+            typeStr = doc.getString(TYPE_PATH).value();
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error(
+                fmt::format(
+                    "Could not get type from document at '{}': {}\nDocument: {}",
+                    TYPE_PATH,
+                    e.what(),
+                    doc.toStrPretty()
+                )
+            );
+        }
+
+        auto type = typeFromName(typeStr);
 
         auto addResp = addDbUnsafe(path, type, false);
         if (base::isError(addResp))
@@ -112,9 +150,9 @@ base::OptError Manager::upsertStoreEntry(std::string_view path)
 
     auto doc = store::Doc();
     
-    doc.setType(path, PATH_PATH);
-    doc.setType(hash, HASH_PATH);
-    doc.setType(typeName(dbs_.at(dbPath.filename().string())->type), TYPE_PATH);
+    doc.setType(PATH_PATH, path);
+    doc.setType(HASH_PATH, hash);
+    doc.setType(TYPE_PATH, typeName(dbs_.at(dbPath.filename().string())->type));
 
     return store_->upsertInternalDoc(internalName, doc);
 }
@@ -194,33 +232,63 @@ base::OptError Manager::addDbUnsafe(std::string_view path, Type type, bool upser
 base::OptError Manager::removeDbUnsafe(std::string_view path)
 {
     auto name = std::filesystem::path(path).filename().string();
+    
+    std::shared_ptr<DbEntry> entry;
 
-    if (dbs_.find(name) == dbs_.end())
+    {
+        auto it = dbs_.find(name);
+        if (it == dbs_.end())
+        {
+            return base::Error{
+                fmt::format(
+                    "Database '{}' not found",
+                    name
+                )
+            };
+        }
+        
+        entry = it->second;
+    }
+
+    if (!entry)
     {
         return base::Error{
             fmt::format(
-                "Database '{}' not found",
-                name
+                "Entry for database '{}' is null", name
             )
         };
     }
 
+    try
     {
-        auto entry = dbs_.at(name);
-
         std::unique_lock<std::shared_mutex> lockEntry(entry->rwMutex);
 
         dbs_.erase(name);
-    }
 
-    for (auto it = dbTypes_.begin(); it != dbTypes_.end(); ++it)
-    {
-        if (it->second == name)
+        //lockEntry.unlock();
+
+        //entry.reset();
+
+        for (auto it = dbTypes_.begin(); it != dbTypes_.end(); ++it)
         {
-            dbTypes_.erase(it);
-            break;
+            if (it->second == name)
+            {
+                dbTypes_.erase(it);
+                break;
+            }
         }
     }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error(
+            fmt::format(
+                "unique_lock failed for rwMapMutex_ in {}: {}",
+                __func__,
+                e.what()
+            )
+        );
+    }
+
 
     return removeInternalEntry(path);
 }
@@ -276,22 +344,55 @@ base::OptError Manager::writeDb(std::string_view path, std::string_view content)
 
 base::OptError Manager::addDb(std::string_view path, Type type)
 {
-    std::unique_lock<std::shared_mutex> lock(rwMapMutex_);
+    
+    try
+    {
+        std::unique_lock<std::shared_mutex> lock(rwMapMutex_);
 
-    return addDbUnsafe(path, type, true);
+        auto resp = addDbUnsafe(path, type, true);
+
+        return resp;
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error(
+            fmt::format(
+                "unique_lock failed for rwMapMutex_ in {}: {}",
+                __func__,
+                e.what()
+            )
+        );
+    }
 }
 
 base::OptError Manager::removeDb(std::string_view path)
 {
-    std::unique_lock<std::shared_mutex> lock(rwMapMutex_);
-    
-    return removeDbUnsafe(path);
+    try
+    {
+        std::unique_lock<std::shared_mutex> lock(rwMapMutex_);
+        
+        auto resp = removeDbUnsafe(path);
+
+        return resp;
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error(
+            fmt::format(
+                "unique_lock failed for rwMapMutex_ in {}: {}",
+                __func__,
+                e.what()
+            )
+        );
+    }
 }
 
 base::OptError
 Manager::remoteUpsertDb(std::string_view path, Type type, std::string_view dbUrl, std::string_view hashUrl)
 {
     auto name = std::filesystem::path(path).filename().string();
+
+    std::unique_lock<std::shared_mutex> lock(rwMapMutex_);
 
     if (dbTypes_.find(type) != dbTypes_.end() && dbTypes_.at(type) != name)
     {
@@ -392,30 +493,44 @@ Manager::remoteUpsertDb(std::string_view path, Type type, std::string_view dbUrl
 
     if (entry != dbs_.end())
     {
-        std::unique_lock<std::shared_mutex> lockEntry(entry->second->rwMutex);
-        auto writeResp = writeDb(path, content);
-        if (base::isError(writeResp))
+        try
         {
-            return base::getError(writeResp);
+            std::unique_lock<std::shared_mutex> lockEntry(entry->second->rwMutex);
+            auto writeResp = writeDb(path, content);
+            if (base::isError(writeResp))
+            {
+                return base::getError(writeResp);
+            }
+
+            MMDB_close(entry->second->mmdb.get());
+
+            int status = MMDB_open(path.data(), MMDB_MODE_MMAP, entry->second->mmdb.get());
+
+            if (MMDB_SUCCESS != status)
+            {
+                lockEntry.unlock();
+                removeDbUnsafe(path);
+
+                return base::Error{
+                    fmt::format(
+                        "Cannot add database '{}': {}",
+                        path,
+                        MMDB_strerror(status)
+                    )
+                };
+            }
         }
-
-        MMDB_close(entry->second->mmdb.get());
-
-        int status = MMDB_open(path.data(), MMDB_MODE_MMAP, entry->second->mmdb.get());
-
-        if (MMDB_SUCCESS != status)
+        catch (const std::exception& e)
         {
-            lockEntry.unlock();
-            removeDbUnsafe(path);
-
-            return base::Error{
+            throw std::runtime_error(
                 fmt::format(
-                    "Cannot add database '{}': {}",
-                    path,
-                    MMDB_strerror(status)
+                    "unique_lock failed for rwMapMutex_ in {}: {}",
+                    __func__,
+                    e.what()
                 )
-            };
+            );
         }
+
     }
     else
     {
