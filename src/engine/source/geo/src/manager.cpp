@@ -282,7 +282,20 @@ base::OptError Manager::writeDb(std::string_view path, std::string_view content)
 {
     auto filePath = std::filesystem::path(path);
 
+    try
+    {
     std::filesystem::create_directories(filePath.parent_path());
+    }
+    catch (const std::exception& e)
+    {
+        return base::Error{
+            fmt::format(
+                "Cannot create directories for '{}': {}",
+                path,
+                e.what()
+            )
+        };
+    }
 
     std::ofstream file(path, std::ios::binary);
 
