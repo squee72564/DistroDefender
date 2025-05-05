@@ -23,6 +23,8 @@ public:
     mutable std::shared_mutex rwMutex; ///< Read-Write mutex for thread safety access to the MMDB database.
     std::unique_ptr<MMDB_s> mmdb;      ///< The MMDB database.
 
+    DbEntry() = delete;
+
     DbEntry(std::string_view path, Type type)
         : path(path)
         , type(type)

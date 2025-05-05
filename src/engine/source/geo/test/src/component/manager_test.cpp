@@ -439,6 +439,7 @@ TEST_F(GeoManagerTest, ComplexUseCase)
         for (auto i = 0; i < times; i++)
         {
             auto locatorResp = manager->getLocator(type);
+
             if (base::isError(locatorResp))
             {
                 if (base::getError(locatorResp).message != noDbError)
@@ -483,6 +484,7 @@ TEST_F(GeoManagerTest, ComplexUseCase)
     {
         threads.emplace_back(locatorFn, manager, type0);
     }
+
     for (int i = 0; i < nThreads1; i++)
     {
         threads.emplace_back(locatorFn, manager, type1);
@@ -493,9 +495,6 @@ TEST_F(GeoManagerTest, ComplexUseCase)
     EXPECT_CALL(*mockStore, upsertInternalDoc(internalName0, testing::_)).WillRepeatedly(testing::Return(storeOk()));
     EXPECT_CALL(*mockStore, deleteInternalDoc(internalName1)).WillRepeatedly(testing::Return(storeOk()));
     EXPECT_CALL(*mockStore, upsertInternalDoc(internalName1, testing::_)).WillRepeatedly(testing::Return(storeOk()));
-
-    try
-    {
 
     // Add a thread to remove the db0
     threads.emplace_back(
@@ -574,12 +573,6 @@ TEST_F(GeoManagerTest, ComplexUseCase)
     for (auto& t : threads)
     {
         t.join();
-    }
-
-    }
-    catch (const std::exception& e)
-    {
-        throw std::runtime_error("FUCK");
     }
 
     ASSERT_FALSE(error.load()) << errorMsg;

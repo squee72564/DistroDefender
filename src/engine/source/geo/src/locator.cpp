@@ -310,9 +310,8 @@ base::RespOrError<std::string> Locator::getString(std::string_view ip, const Dot
 
     std::shared_lock lock(entry->rwMutex);
 
-    entry.reset();
-    entry = weakDbEntry_.lock();
-    if (nullptr == entry)
+    // Check liveness again; if count == 1 we could be in shutdown or invalid state
+    if (1 >= entry.use_count())
     {
         return base::Error{"Database is not available"};
     }
@@ -349,9 +348,8 @@ base::RespOrError<std::uint32_t> Locator::getUint32(std::string_view ip, const D
 
     std::shared_lock lock(entry->rwMutex);
 
-    entry.reset();
-    entry = weakDbEntry_.lock();
-    if (nullptr == entry)
+    // Check liveness again; if count == 1 we could be in shutdown or invalid state
+    if (1 >= entry.use_count())
     {
         return base::Error{"Database is not available"};
     }
@@ -388,9 +386,8 @@ base::RespOrError<double> Locator::getDouble(std::string_view ip, const DotPath&
 
     std::shared_lock lock(entry->rwMutex);
 
-    entry.reset();
-    entry = weakDbEntry_.lock();
-    if (nullptr == entry)
+    // Check liveness again; if count == 1 we could be in shutdown or invalid state
+    if (1 >= entry.use_count())
     {
         return base::Error{"Database is not available"};
     }
@@ -420,6 +417,7 @@ base::RespOrError<double> Locator::getDouble(std::string_view ip, const DotPath&
 base::RespOrError<json::Json> Locator::getAsJson(std::string_view ip, const DotPath& path)
 {
     auto entry = weakDbEntry_.lock();
+
     if (nullptr == entry)
     {
         return base::Error{"Database is not available"};
@@ -427,9 +425,8 @@ base::RespOrError<json::Json> Locator::getAsJson(std::string_view ip, const DotP
 
     std::shared_lock lock(entry->rwMutex);
 
-    entry.reset();
-    entry = weakDbEntry_.lock();
-    if (nullptr == entry)
+    // Check liveness again; if count == 1 we could be in shutdown or invalid state
+    if (1 >= entry.use_count())
     {
         return base::Error{"Database is not available"};
     }
