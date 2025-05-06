@@ -16,12 +16,12 @@ set(SRCS
 set(PRIVATE_LINKS
     cpr::cpr
     maxminddb::maxminddb
-    OpenSSL::Crypto
 )
 
 set(PUBLIC_LINKS
     geo::igeo
     store::istore
+    OpenSSL::Crypto
 )
 
 # Patch the maxminddb target
@@ -100,7 +100,6 @@ target_link_libraries(geo_ctest
     geo
     GTest::gtest_main
     store::mocks
-    OpenSSL::Crypto
 )
 
 target_compile_definitions(geo_ctest PRIVATE MMDB_PATH_TEST="${MMDB_PATH_TEST}")

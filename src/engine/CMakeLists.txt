@@ -118,7 +118,6 @@ target_link_libraries(main
     api
     schemas
     geo
-    OpenSSL::Crypto
     archiver
 )
 
