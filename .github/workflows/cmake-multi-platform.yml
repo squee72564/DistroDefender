@@ -32,11 +32,11 @@ jobs:
     - name: Prepare config in temp dir
       run: |
         mkdir -p "${{ runner.temp }}/dd_config"
-        cp config/dd_engine_config.json "${{ runner.temp }}/dd_config/dd_engine_config.json"
+        cp src/engine/../../config/dd_engine_config.json "${{ runner.temp }}/dd_config/dd_engine_config.json"
 
     - name: Configure CMake
       run: |
-        cmake -B build -S . \
+        cmake -B build -S ${{ github.workspace }}/src/engine \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DENGINE_BUILD_TEST=ON \
