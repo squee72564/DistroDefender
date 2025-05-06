@@ -1,0 +1,50 @@
+name: CMake on macOS and Linux
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies (Linux only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build
+
+    - name: Set up vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.sh
+
+    - name: Prepare config in temp dir
+      run: |
+        mkdir -p "${{ runner.temp }}/dd_config"
+        cp config/dd_engine_config.json "${{ runner.temp }}/dd_config/dd_engine_config.json"
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DENGINE_BUILD_TEST=ON \
+          -DENGINE_CONFIG_PATH="${{ runner.temp }}/dd_config/dd_engine_config.json"
+
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }} -- -j4
+
+    - name: Run tests
+      working-directory: build
+      run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
