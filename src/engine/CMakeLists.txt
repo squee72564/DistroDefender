@@ -104,6 +104,7 @@ add_subdirectory(${ENGINE_SOURCE_DIR}/store)
 add_subdirectory(${ENGINE_SOURCE_DIR}/api)
 add_subdirectory(${ENGINE_SOURCE_DIR}/schemas)
 add_subdirectory(${ENGINE_SOURCE_DIR}/geo)
+add_subdirectory(${ENGINE_SOURCE_DIR}/archiver)
 
 add_subdirectory(${ENGINE_SOURCE_DIR}/builder)
 
@@ -118,6 +119,7 @@ target_link_libraries(main
     schemas
     geo
     OpenSSL::Crypto
+    archiver
 )
 
 # Build Benchmark
