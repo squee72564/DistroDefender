@@ -16,6 +16,7 @@ set(SRCS
 set(PRIVATE_LINKS
     cpr::cpr
     maxminddb::maxminddb
+    OpenSSL::Crypto
 )
 
 set(PUBLIC_LINKS
@@ -82,7 +83,6 @@ target_link_libraries(geo_utest
     ${PUBLIC_LINKS}
     GTest::gtest_main
     store::mocks
-    OpenSSL::Crypto
 )
 
 gtest_discover_tests(geo_utest)
