@@ -26,8 +26,8 @@ jobs:
 
     - name: Set up vcpkg
       run: |
-        git clone https://github.com/microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.sh
+        git clone https://github.com/microsoft/vcpkg.git ${{ runner.temp }}/vcpkg
+        ${{ runner.temp }}/vcpkg/bootstrap-vcpkg.sh
 
     - name: Prepare config in temp dir
       run: |
@@ -38,7 +38,7 @@ jobs:
       run: |
         cmake -B build -S ${{ github.workspace }}/src/engine \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=${{ runner.temp }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DENGINE_BUILD_TEST=ON \
           -DENGINE_CONFIG_PATH="${{ runner.temp }}/dd_config/dd_engine_config.json"
 
