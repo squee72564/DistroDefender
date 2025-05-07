@@ -58,7 +58,7 @@ Conf::Conf(std::shared_ptr<IConfLoader> confLoader)
     addUnit<std::string>(
         key::ARCHIVER_PATH,
         "DD_ARCHIVER_PATH",
-        "/tmp/archiver_path/"
+        "/var/lib_distro_defender/archiver/dd_archive.txt"
     );
 
     addUnit<bool>(
