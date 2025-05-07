@@ -4,5 +4,6 @@
 #include <api/catalog/handlers.hpp>
 #include <api/kvdb/handlers.hpp>
 #include <api/geo/handlers.hpp>
+#include <api/archiver/handlers.hpp>
 
 #endif // _API_HANDLERS_HPP
