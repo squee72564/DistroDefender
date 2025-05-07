@@ -12,6 +12,10 @@
         },
         "store": {
             "path": "/var/lib/distro_defender/engine/store"
+        },
+        "archiver": {
+            "path": "/tmp/archiver_path/",
+            "enabled": true
         }
     }
 }

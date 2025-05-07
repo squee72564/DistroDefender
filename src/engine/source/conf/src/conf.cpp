@@ -48,10 +48,23 @@ Conf::Conf(std::shared_ptr<IConfLoader> confLoader)
         "/tmp/distro_defender_event.sock"
     );
 
+    // Store
     addUnit<std::string>(
         key::STORE_PATH,
         "DD_STORE_PATH",
         "/var/lib/distro_defender/engine/store"
+    );
+
+    addUnit<std::string>(
+        key::ARCHIVER_PATH,
+        "DD_ARCHIVER_PATH",
+        "/tmp/archiver_path/"
+    );
+
+    addUnit<bool>(
+        key::ARCHIVER_ENABLED,
+        "DD_ARCHIVER_ENABLED",
+        true
     );
 };
 
